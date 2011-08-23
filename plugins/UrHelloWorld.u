@@ -1,0 +1,17 @@
+
+requireFile("UrPlugin.u");
+
+class UrHelloWorld : UrPlugin {
+	var chan = nil;
+	function configure(params) {
+		chan = params[0];
+	};
+	load = function () {
+		bot.send!(["JOIN " + chan]);
+		bot.send!(["PRIVMSG %s : Hello world !" % [chan] ]);
+	};
+};
+
+
+
+

@@ -1,0 +1,12 @@
+
+requireFile("UrPlugin.u");
+
+class UrPong : UrPlugin {
+	load = function () {
+		at (bot.recv?("ping", var captures)) {
+			bot.send!(["PONG " + captures["payload"]]);
+		};
+	};
+};
+
+

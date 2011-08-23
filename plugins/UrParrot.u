@@ -1,0 +1,15 @@
+
+requireFile("UrPlugin.u");
+
+
+class UrParrot : UrPlugin {
+	load = function () {
+		at (bot.recv?("chan_msg", var captures)) {
+                        bot.send!(["PRIVMSG " + captures["chan"] + " :" + captures["nick"] + ": " + captures["msg"]]);
+                };
+	};
+};
+
+
+
+

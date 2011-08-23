@@ -2,6 +2,9 @@
 requireFile("UrSocket.u");
 requireFile("UrEventDispatcher.u");  
 requireFile("UrPlugin.u");
+requireFile("plugins/UrPong.u");
+requireFile("plugins/UrHelloWorld.u");
+requireFile("plugins/UrParrot.u");
 
 
 // urbi necessary socket poll
@@ -53,38 +56,6 @@ class UrBot {
 	};
 };
 
-
-class UrSingleChanPlugin : UrPlugin {
-	var chan = nil;
-	function configure(params) {
-		chan = params[0];
-	};
-};
-
-
-class UrHelloWorld : UrSingleChanPlugin {
-	load = function () {
-		bot.send!(["JOIN " + chan]);
-		bot.send!(["PRIVMSG %s : Hello world !" % [chan] ]);
-	};
-};
-
-class UrPong : UrPlugin {
-	load = function () {
-		at (bot.recv?("ping", var captures)) {
-			bot.send!(["PONG " + captures["payload"]]);
-		};
-	};
-};
-
-
-class UrParrot : UrPlugin {
-	load = function () {
-		at (bot.recv?("chan_msg", var captures)) {
-                        bot.send!(["PRIVMSG " + captures["chan"] + " : " + captures["nick"] + ": " + captures["msg"]]);
-                };
-	};
-};
 
 
 var bot = UrBot.new(UrSocket.new,"irc.iiens.net", 6667, "Urbot");
