@@ -1,11 +1,12 @@
 
 requireFile("UrBot.u");
 requireFile("UrSocket.u");
-requireFile("UrEventDispatcher.u");  
 requireFile("UrPlugin.u");
+requireFile("plugins/UrEventDispatcher.u");  
 requireFile("plugins/UrPong.u");
 requireFile("plugins/UrHelloWorld.u");
 requireFile("plugins/UrParrot.u");
+requireFile("plugins/UrChan.u");
 
 // urbi necessary socket poll
 every (500ms)
@@ -17,7 +18,8 @@ UrPong.new(bot).load;
 bot.connect;
 
 sleep(2s);
-UrHelloWorld.new(bot, "#urbot").load;
+urbot_chan = UrChan.new(bot,"#urbot");
+UrHelloWorld.new(bot, urbot_chan).load;
 UrParrot.new(bot).load;
 
 

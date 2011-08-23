@@ -5,10 +5,12 @@ class UrHelloWorld : UrPlugin {
 	var chan = nil;
 	function configure(params) {
 		chan = params[0];
+		echo(params);
+		echo(chan);
 	};
 	load = function () {
-		bot.send!(["JOIN " + chan]);
-		bot.send!(["PRIVMSG %s : Hello world !" % [chan] ]);
+		chan.join;
+		chan.sendMessage("Hello World");
 	};
 };
 

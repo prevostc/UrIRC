@@ -1,0 +1,26 @@
+
+requireFile("UrPlugin.u");
+
+class UrChan : UrPlugin {
+
+	var name = nil;
+	var joined = false;
+
+	function configure(params) {
+		name = params[0];
+	};
+	
+	function join() {
+		if (!joined) {
+			bot.send!(["JOIN " + name]);
+			joined = true;
+		};
+	};
+	
+	function sendMessage(msg) {
+		if (joined) {
+			bot.send!(["PRIVMSG " + name + " :" + msg ]);
+		};
+	};
+};
+
