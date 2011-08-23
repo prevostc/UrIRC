@@ -1,4 +1,3 @@
-
 requireFile("UrPlugin.u");
 
 
@@ -8,6 +7,8 @@ class UrEventDispatcher : UrPlugin {
         var match_map = [
                 ["regexp" => "^PING (.+)$", "recv_code" => "ping", "captures" => ["payload"]],
 		["regexp" => ":(.+?)!(.+?) PRIVMSG (#.+?) :(.+?)$", "recv_code" => "chan_msg", "captures" => ["nick", "serv", "chan", "msg"]],
+		["regexp" => ":(.+?)!(.+?) JOIN (#.+?) (.+?)$", "recv_code" => "chan_join", "captures" => ["nick", "serv", "chan", "rest"]],
+		["regexp" => ":(.+?)!(.+?) NICK (.+?)$", "recv_code" => "nick_change", "captures" => ["old_nick", "serv", "new_nick"]],
         ];
 
         // set socket messages handler on load
@@ -39,3 +40,5 @@ class UrEventDispatcher : UrPlugin {
                 };
         };
 };
+
+
