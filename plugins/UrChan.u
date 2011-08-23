@@ -8,7 +8,6 @@ class UrChan : UrPlugin {
 
 	function configure(params) {
 		name = params[0];
-		bot.chans[name] = this;
 	};
 	
 	function join() {
@@ -23,5 +22,9 @@ class UrChan : UrPlugin {
 			bot.send!(["PRIVMSG " + name + " :" + msg ]);
 		};
 	};
+
+	function asString() {
+		"UrChan : " + name;
+	}
 };
 

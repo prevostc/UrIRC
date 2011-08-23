@@ -5,12 +5,11 @@ class UrHelloWorld : UrPlugin {
 	var chan = nil;
 	function configure(params) {
 		chan = params[0];
-		echo(params);
-		echo(chan);
+		bot.addChan(chan);
 	};
 	load = function () {
-		chan.join;
-		chan.sendMessage("Hello World");
+		bot.getChan(chan).join;
+		bot.getChan(chan).sendMessage("Hello World");
 	};
 };
 

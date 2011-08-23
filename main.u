@@ -1,26 +1,15 @@
 
 requireFile("UrBot.u");
-requireFile("UrSocket.u");
-requireFile("UrPlugin.u");
-requireFile("plugins/UrEventDispatcher.u");  
-requireFile("plugins/UrPong.u");
 requireFile("plugins/UrHelloWorld.u");
 requireFile("plugins/UrParrot.u");
-requireFile("plugins/UrChan.u");
 
 // urbi necessary socket poll
 every (500ms)
 	Socket.poll,
 
-var bot = UrBot.new(UrSocket.new,"irc.iiens.net", 6667, "Urbot");
-UrEventDispatcher.new(bot).load;
-UrPong.new(bot).load;
+var bot = UrBot.new("irc.iiens.net", 6667, "Urbot");
 bot.connect;
 
-sleep(2s);
-urbot_chan = UrChan.new(bot,"#urbot");
-UrHelloWorld.new(bot, urbot_chan).load;
+UrHelloWorld.new(bot, "#urbot").load;
 UrParrot.new(bot).load;
-
-
 

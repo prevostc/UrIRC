@@ -1,4 +1,8 @@
 
+requireFile("UrSocket.u");
+requireFile("plugins/UrChan.u");
+requireFile("plugins/UrPong.u");
+requireFile("plugins/UrEventDispatcher.u");
 
 // bot class
 class UrBot {
@@ -14,12 +18,12 @@ class UrBot {
 	var chans = nil;
 
 
-	function init(socket,server_url, port_nb, nickname) {
+	function init(server_url, port_nb, nickname) {
 		// init object vars
 		server = server_url|
 		port = port_nb|
 		nick = nickname|
-		client = socket|
+		client = UrSocket.new|
 		chans = Dictionary.new|
 
 		// send command handler
@@ -27,6 +31,12 @@ class UrBot {
 			for| (var msg : msgs)
 				write(msg);
 		};
+
+		// ==== start core plugins
+		// handle socket messages and emit meaningfull events
+		UrEventDispatcher.new(this).load;
+		// answer pong to ping
+		UrPong.new(this).load;
 	};
 	
 	// connection function
@@ -46,6 +56,33 @@ class UrBot {
 	function asString() {
 		"Urbot : [%s@%s:%s]" % [nick,server,port]; 
 	};
+
+	function addChan(name) {
+		if (!chans.has(name.toLower)) {
+			var chan = UrChan.new(this, name.toLower)|
+			chans[chan.name] = chan|
+			chan.join;
+		};
+	};
+
+	function getChan(name) {	
+		if (chans.has(name.toLower)) 
+			chans[name.toLower]
+		else 
+			nil;
+	};
+
 };
 
 
+// allow UrChan.new inside UrBot class
+UrBot.setSlot("UrChan", UrChan);
+
+// allow UrSocket.new inside UrBot class
+UrBot.setSlot("UrSocket", UrSocket);
+
+// allow UrPong.new inside UrBot class
+UrBot.setSlot("UrPong", UrPong);
+
+// allow UrEventDispatcher.new inside UrBot class
+UrBot.setSlot("UrEventDispatcher", UrEventDispatcher);
