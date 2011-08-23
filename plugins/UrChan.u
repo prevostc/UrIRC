@@ -8,6 +8,7 @@ class UrChan : UrPlugin {
 
 	function configure(params) {
 		name = params[0];
+		bot.chans[name] = this;
 	};
 	
 	function join() {

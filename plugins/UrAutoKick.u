@@ -8,11 +8,13 @@ class UrParrot : UrPlugin {
 	var chan = nil;
 
 	function configure(params) {
-		chan = bot.getChan(params[0]);
+		chan = params[0];
 		regexp = Regexp.new(params[1]);
 	};
 
 	load = function () {
+		chan.join;
+
 		at (bot.recv?("chan_join", var captures) if captures["chan"] == chan && captures["user"].serv in regexp) {
                         echo("join detected with regexp : " + regexp);
                 };
