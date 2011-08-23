@@ -1,0 +1,41 @@
+
+requireFile("UrPlugin.u");
+
+
+class UrEventDispatcher : UrPlugin {
+
+        // define match map
+        var match_map = [
+                ["regexp" => "^PING (.+)$", "recv_code" => "ping", "captures" => ["payload"]],
+		["regexp" => ":(.+?)!(.+?) PRIVMSG (#.+?) :(.+?)$", "recv_code" => "chan_msg", "captures" => ["nick", "serv", "chan", "msg"]],
+        ];
+
+        // set socket messages handler on load
+        load = function() {
+                at (bot.client.received?(var msg)) {
+                        bot.log.log << "RECEIVED : " + msg;
+                        parse(msg);
+                };
+        };
+
+        // parse a server message and trigger the corresponding event
+        function parse(msg) {
+                // for each match
+                for (var map : match_map) {
+                        // create the regexp object
+                        var re = Regexp.new(map["regexp"]);
+                        if (re.match(msg)) {
+                                // build the captures dictionnary
+                                var captures = Dictionary.new;
+                                for (var i = 0 ; i < map["captures"].size ; i+=1 )
+                                        captures[map["captures"][i]] = re.matches[i+1];
+
+                                bot.log << captures;
+
+                                // emit the good event
+                                bot.recv!(map["recv_code"], captures);
+                                return true;
+                        };
+                };
+        };
+};

@@ -1,0 +1,100 @@
+
+requireFile("UrSocket.u");
+requireFile("UrEventDispatcher.u");  
+requireFile("UrPlugin.u");
+
+
+// urbi necessary socket poll
+every (500ms)
+	Socket.poll,
+
+// bot class
+class UrBot {
+	var log = Logger.new("UrBot");
+
+	var send = Event.new; // in
+	var recv = Event.new; // out
+
+	var client = nil;
+	var server = nil;
+	var port = nil;
+	var nick = nil;
+
+	function init(socket,server_url, port_nb, nickname) {
+		// init object vars
+		server = server_url|
+		port = port_nb|
+		nick = nickname|
+		client = socket|
+
+		// send command handler
+		at (send?(var msgs)) {
+			for| (var msg : msgs)
+				write(msg);
+		};
+	};
+	
+	// connection function
+	function connect() {
+		// connect action
+		client.connect(server, port);
+		write("USER urbot uurbot uuurbot : UrBot");
+		write("NICK " + nick);
+	};
+
+	// private write function
+	function write(msg) {
+		log.err << msg;
+		client.write(msg + "\n");
+	};
+
+	function asString() {
+		"Urbot : [%s@%s:%s]" % [nick,server,port]; 
+	};
+};
+
+
+class UrSingleChanPlugin : UrPlugin {
+	var chan = nil;
+	function configure(params) {
+		chan = params[0];
+	};
+};
+
+
+class UrHelloWorld : UrSingleChanPlugin {
+	load = function () {
+		bot.send!(["JOIN " + chan]);
+		bot.send!(["PRIVMSG %s : Hello world !" % [chan] ]);
+	};
+};
+
+class UrPong : UrPlugin {
+	load = function () {
+		at (bot.recv?("ping", var captures)) {
+			bot.send!(["PONG " + captures["payload"]]);
+		};
+	};
+};
+
+
+class UrParrot : UrPlugin {
+	load = function () {
+		at (bot.recv?("chan_msg", var captures)) {
+                        bot.send!(["PRIVMSG " + captures["chan"] + " : " + captures["nick"] + ": " + captures["msg"]]);
+                };
+	};
+};
+
+
+var bot = UrBot.new(UrSocket.new,"irc.iiens.net", 6667, "Urbot");
+UrEventDispatcher.new(bot).load;
+UrPong.new(bot).load;
+bot.connect;
+
+sleep(2s);
+UrHelloWorld.new(bot, "#urbot").load;
+UrParrot.new(bot).load;
+
+
+

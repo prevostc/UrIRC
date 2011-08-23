@@ -1,0 +1,37 @@
+// socket sending event on each received line
+class UrSocket {
+	var log = Logger.new("UrSocket");
+	var client = nil;
+	var line_rest = nil;
+	var received = Event.new; // out
+
+	function init() {
+		client = Socket.new;
+		// error handling
+		at (this.client.disconnected?) 	{log.err << "Socket client disconnected"};
+		at (this.client.error?)		{log.err << "Socket client disconnected"};
+		
+		// define callback on data poll
+		at (this.client.received?(var msg)) {	
+			// append last cutted line if exists
+			var data = {if (line_rest != nil) {line_rest + msg} else msg;}|
+			
+			// split multiline messages
+			var lines = data.split(["\r\n", "\n"])|
+			
+			// get last message (empty if newline-terminated) and save if non empty
+			// note : assert{"1\n".split() == ["1", ""]};
+			var last = lines.removeBack|
+			line_rest = {if (last != "") last else nil;}|
+
+			// send an event for each message
+			for (var line : lines) {received!(line)};
+		};
+	};
+	
+	function connect(server, port) {
+		client.connect(server, port);
+	};
+
+	function write(msg) {client.write(msg)};
+};
