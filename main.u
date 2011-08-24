@@ -13,7 +13,7 @@ var bot = UrIRC.UrBot.new("irc.iiens.net", 6667, "Urbot");
 bot.connect;
 
 UrIRC.UrHelloWorld.new(bot, "#urbot").load;
-//UrIRC.UrParrot.new(bot, "#urbot2").load;
+UrIRC.UrParrot.new(bot, "#urbot2").load;
 UrIRC.UrAutoKick.new(bot, "#urbot2").load;
 echo(bot.getUser("UrBot"));
 echo(bot.getUser("Clement"));
