@@ -1,14 +1,20 @@
 
-class UrPlugin {
+requireFile("UrIRC.u");
+
+class UrIRC.UrPlugin {
 	var bot = nil;
 	function init {
 		var args = call.evalArgs;
 		bot = args[0];
-		// handle plugins with no arguments (pong)
-		if (this.hasSlot("configure")) configure(args.tail);
+		configure(args.tail);
 	};
+	var configure = function(params){};
 	var load = function() {};
 	var unload = function() {};
+	var reload = function() {
+		this.unload;
+		this.load;
+	};
 };
 
 

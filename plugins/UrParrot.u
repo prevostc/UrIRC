@@ -1,11 +1,17 @@
 
+requireFile("UrIRC.u");
 requireFile("UrPlugin.u");
 
 
-class UrParrot : UrPlugin {
+class UrIRC.UrParrot : UrIRC.UrPlugin {
+	var chan;
+
+	function configure(params) {
+		chan = bot.getChan(params[0]);
+	};
+
 	load = function () {
-		at (bot.recv?("chan_msg", var captures)) {
-			var chan = bot.getChan(captures["chan"]);
+		at (bot.recv?("chan_msg", var captures) if captures["chan"] == chan.name) {
 			chan.sendMessage(captures["nick"] + ": " + captures["msg"]);
                 };
 	};

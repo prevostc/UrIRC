@@ -1,11 +1,13 @@
 
 requireFile("UrSocket.u");
 requireFile("plugins/UrChan.u");
+requireFile("plugins/UrUser.u");
 requireFile("plugins/UrPong.u");
 requireFile("plugins/UrEventDispatcher.u");
 
 // bot class
-class UrBot {
+class UrIRC.UrBot {
+	
 	var log = Logger.new("UrBot");
 
 	var send = Event.new; // in
@@ -15,16 +17,18 @@ class UrBot {
 	var server = nil;
 	var port = nil;
 	var nick = nil;
+	
 	var chans = nil;
-
+	var users = nil;
 
 	function init(server_url, port_nb, nickname) {
 		// init object vars
 		server = server_url|
 		port = port_nb|
 		nick = nickname|
-		client = UrSocket.new|
+		client = UrIRC.UrSocket.new|
 		chans = Dictionary.new|
+		users = Dictionary.new|
 
 		// send command handler
 		at (send?(var msgs)) {
@@ -34,9 +38,9 @@ class UrBot {
 
 		// ==== start core plugins
 		// handle socket messages and emit meaningfull events
-		UrEventDispatcher.new(this).load;
+		UrIRC.UrEventDispatcher.new(this).load;
 		// answer pong to ping
-		UrPong.new(this).load;
+		UrIRC.UrPong.new(this).load;
 	};
 	
 	// connection function
@@ -57,32 +61,54 @@ class UrBot {
 		"Urbot : [%s@%s:%s]" % [nick,server,port]; 
 	};
 
-	function addChan(name) {
-		if (!chans.has(name.toLower)) {
-			var chan = UrChan.new(this, name.toLower)|
+	function getChan(name) {	
+		if (chans.has(name.toLower)) {
+			chans[name.toLower]
+		} else { 	
+			var chan = UrIRC.UrChan.new(this, name.toLower)|
 			chans[chan.name] = chan|
 			chan.join;
+			chan;
 		};
 	};
 
-	function getChan(name) {	
-		if (chans.has(name.toLower)) 
-			chans[name.toLower]
-		else 
-			nil;
-	};
+	function getUser(nick, loginServ = nil) {	
+		// caller have loginServ 
+		if (!loginServ.isNil) { 
+			
+			// user is already known
+			if (users.has(loginServ.toLower)) {
+				users[loginServ.toLower]
+			
+			// we don't know this user
+			} else { 	
+				var user = UrIRC.UrUser.new(this, nick, loginServ.toLower);
+				users[user.loginServ] = user;
+				user
+			};
+		
+		// caller does not know loginServ
+		} else {	
+			// user is already known
+			for| (var record : users) {
+				if (record.second.nick == nick) return record.second;
+			}; 
 
+			// we don't know this user
+			this.write("WHOIS " + nick);
+			waituntil(this.recv?(var event, var captures) if 
+				  (event == "whois_user" && (captures["nick"].toLower == nick.toLower)) // user found
+				|| (event == "whois_nosuchnick" && (captures["nick"].toLower == nick.toLower)) // user not found	
+			);
+			if (event == "whois_user") {
+				var user = UrIRC.UrUser.new(this, captures["nick"], captures["login"].toLower + "@" + captures["serv"].toLower);
+				users[user.loginServ] = user;
+				user
+			} else {
+				nil
+			};
+		};
+	};
 };
 
 
-// allow UrChan.new inside UrBot class
-UrBot.setSlot("UrChan", UrChan);
-
-// allow UrSocket.new inside UrBot class
-UrBot.setSlot("UrSocket", UrSocket);
-
-// allow UrPong.new inside UrBot class
-UrBot.setSlot("UrPong", UrPong);
-
-// allow UrEventDispatcher.new inside UrBot class
-UrBot.setSlot("UrEventDispatcher", UrEventDispatcher);

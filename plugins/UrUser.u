@@ -1,0 +1,31 @@
+
+requireFile("UrIRC.u");
+requireFile("UrPlugin.u");
+
+class UrIRC.UrUser : UrIRC.UrPlugin {
+
+	var nick = nil;
+	var loginServ = nil;
+
+	function configure(params) {
+		nick = params[0];
+		loginServ = params[1];
+		echo(loginServ);
+		/*
+		at (bot.recv?("chan_join", var captures)) {
+			_isJoined = true|
+			joined!;
+		};*/
+	};
+	
+	function join() {
+		if (!isJoined) {
+			bot.send!(["JOIN " + name]);
+		};
+	};
+	
+	function asString() {
+		"UrUser: " + nick + "(" + loginServ + ")";
+	}
+};
+

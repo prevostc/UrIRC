@@ -1,5 +1,7 @@
+requireFile("UrIRC.u");
+
 // socket sending event on each received line
-class UrSocket {
+class UrIRC.UrSocket {
 	var log = Logger.new("UrSocket");
 	var client = nil;
 	var line_rest = nil;

@@ -1,10 +1,11 @@
 
+requireFile("UrIRC.u");
 requireFile("UrPlugin.u");
 
-class UrPong : UrPlugin {
+class UrIRC.UrPong : UrIRC.UrPlugin {
 	load = function () {
 		at (bot.recv?("ping", var captures)) {
-			bot.send!(["PONG " + captures["payload"]]);
+			bot.write("PONG " + captures["payload"]);
 		};
 	};
 };

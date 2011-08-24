@@ -1,25 +1,22 @@
 
+requireFile("UrIRC.u");
 requireFile("UrPlugin.u");
 
 
-class UrParrot : UrPlugin {
+class UrIRC.UrAutoKick : UrIRC.UrPlugin {
 
-	var regexp = nil;
 	var chan = nil;
 
 	function configure(params) {
-		chan = params[0];
-		regexp = Regexp.new(params[1]);
+		chan = bot.getChan(params[0]);
 	};
 
 	load = function () {
-		chan.join;
-
-		at (bot.recv?("chan_join", var captures) if captures["chan"] == chan && captures["user"].serv in regexp) {
-                        echo("join detected with regexp : " + regexp);
+		at (bot.recv?("chan_join", var captures) if captures["chan"] == chan.name) {
+			var user = bot.getUser(captures["nick"], captures["serv"]);
                 };
 		
-		at (bot.recv?("nick_change", var captures) if captures["user"].serv in regexp) {
+		at (bot.recv?("nick_change", var captures)) {
                         echo("nick change detected with regexp : " + regexp);	
 		};
 	};

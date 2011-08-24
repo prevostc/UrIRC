@@ -1,26 +1,37 @@
 
+requireFile("UrIRC.u");
 requireFile("UrPlugin.u");
 
-class UrChan : UrPlugin {
+class UrIRC.UrChan : UrIRC.UrPlugin {
 
 	var name = nil;
-	var joined = false;
+	var joined = nil;
+	var _isJoined = false;
 
 	function configure(params) {
 		name = params[0];
+		joined = Event.new;
+
+		at (bot.recv?("chan_join", var captures) if captures["chan"] == name && captures["nick"] == bot.nick) {
+			_isJoined = true|
+			joined!;
+		};
 	};
 	
 	function join() {
-		if (!joined) {
-			bot.send!(["JOIN " + name]);
-			joined = true;
+		if (!isJoined) {
+			bot.write("JOIN " + name);
 		};
 	};
 	
 	function sendMessage(msg) {
-		if (joined) {
-			bot.send!(["PRIVMSG " + name + " :" + msg ]);
+		if (isJoined) {
+			bot.write("PRIVMSG " + name + " :" + msg);
 		};
+	};
+
+	function isJoined() {
+		_isJoined;
 	};
 
 	function asString() {

@@ -1,23 +1,39 @@
+requireFile("UrIRC.u");
 requireFile("UrPlugin.u");
 
+class UrIRC.UrEventDispatcher : UrIRC.UrPlugin {
 
-class UrEventDispatcher : UrPlugin {
+	var log = Logger.new("UrEventDispatcher");
+	var match_map = nil;
 
-        // define match map
-        var match_map = [
-                ["regexp" => "^PING (.+)$", "recv_code" => "ping", "captures" => ["payload"]],
-		["regexp" => ":(.+?)!(.+?) PRIVMSG (#.+?) :(.+?)$", "recv_code" => "chan_msg", "captures" => ["nick", "serv", "chan", "msg"]],
-		["regexp" => ":(.+?)!(.+?) JOIN (#.+?) (.+?)$", "recv_code" => "chan_join", "captures" => ["nick", "serv", "chan", "rest"]],
-		["regexp" => ":(.+?)!(.+?) NICK (.+?)$", "recv_code" => "nick_change", "captures" => ["old_nick", "serv", "new_nick"]],
-        ];
-
-        // set socket messages handler on load
         load = function() {
+		
+		loadMatchMap();
+
+                // set socket messages handler on load
                 at (bot.client.received?(var msg)) {
-                        bot.log.log << "RECEIVED : " + msg;
                         parse(msg);
                 };
         };
+
+	function loadMatchMap() {
+		match_map = [
+			["regexp" => "^PING (.+)$", "recv_code" => "ping", "captures" => ["payload"]],
+			["regexp" => ":(.+?)!(.+?) PRIVMSG (#.+?) :(.+?)$", "recv_code" => "chan_msg", "captures" => ["nick", "serv", "chan", "msg"]],
+			["regexp" => ":(.+?)!(.+?) JOIN :(#.+?)$", "recv_code" => "chan_join", "captures" => ["nick", "serv", "chan"]],
+			["regexp" => ":(.+?)!(.+?) NICK (.+?)$", "recv_code" => "nick_change", "captures" => ["old_nick", "serv", "new_nick"]],
+			[ // whois 311, contains user login, server and real name
+				"regexp" => ":%s 311 %s (.+?) (.+?) (.+?) \\* :(.+?)$" % [bot.server, bot.nick], 
+				"recv_code" => "whois_user", 
+				"captures" => ["nick", "login", "serv", "real_name"]
+			],
+			[ // whois 401, no such nick
+				"regexp" => ":%s 401 %s (.+?) :(.+?)$" % [bot.server, bot.nick], 
+				"recv_code" => "whois_nosuchnick", 
+				"captures" => ["nick", "msg"]
+			],
+		];
+	};
 
         // parse a server message and trigger the corresponding event
         function parse(msg) {
@@ -31,13 +47,14 @@ class UrEventDispatcher : UrPlugin {
                                 for (var i = 0 ; i < map["captures"].size ; i+=1 )
                                         captures[map["captures"][i]] = re.matches[i+1];
 
-                                bot.log << captures;
+                                log.log << "MATCHED MSG : " + map["recv_code"] + captures;
 
                                 // emit the good event
                                 bot.recv!(map["recv_code"], captures);
                                 return true;
                         };
                 };
+               	log.err << "UNKNOWN MSG : " + msg;
         };
 };
 

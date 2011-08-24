@@ -2,14 +2,19 @@
 requireFile("UrBot.u");
 requireFile("plugins/UrHelloWorld.u");
 requireFile("plugins/UrParrot.u");
+requireFile("plugins/UrAutoKick.u");
+
 
 // urbi necessary socket poll
 every (500ms)
 	Socket.poll,
 
-var bot = UrBot.new("irc.iiens.net", 6667, "Urbot");
+var bot = UrIRC.UrBot.new("irc.iiens.net", 6667, "Urbot");
 bot.connect;
 
-UrHelloWorld.new(bot, "#urbot").load;
-UrParrot.new(bot).load;
-
+UrIRC.UrHelloWorld.new(bot, "#urbot").load;
+//UrIRC.UrParrot.new(bot, "#urbot2").load;
+UrIRC.UrAutoKick.new(bot, "#urbot2").load;
+echo(bot.getUser("UrBot"));
+echo(bot.getUser("Clement"));
+echo(bot.getUser("azfzegekzprfjo"));

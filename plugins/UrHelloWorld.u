@@ -1,15 +1,22 @@
 
+requireFile("UrIRC.u");
 requireFile("UrPlugin.u");
 
-class UrHelloWorld : UrPlugin {
-	var chan = nil;
-	function configure(params) {
-		chan = params[0];
-		bot.addChan(chan);
+class UrIRC.UrHelloWorld : UrIRC.UrPlugin {
+	var chan;
+
+        function configure(params) {
+                chan = bot.getChan(params[0]);
+        };
+	
+	function load() {
+		if (chan.isJoined) hello
+		else at (chan.joined?) {hello};
 	};
-	load = function () {
-		bot.getChan(chan).join;
-		bot.getChan(chan).sendMessage("Hello World");
+
+	// code factorization methods
+	function hello() {
+		chan.sendMessage("Hello World");
 	};
 };
 
