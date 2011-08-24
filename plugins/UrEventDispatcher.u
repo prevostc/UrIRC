@@ -25,7 +25,7 @@ class UrIRC.UrEventDispatcher : UrIRC.UrPlugin {
 			[ // whois 311, contains user login, server and real name
 				"regexp" => ":%s 311 %s (.+?) (.+?) (.+?) \\* :(.+?)$" % [bot.server, bot.nick], 
 				"recv_code" => "whois_user", 
-				"captures" => ["nick", "login", "serv", "real_name"]
+				"captures" => ["nick", "user", "host", "real_name"]
 			],
 			[ // whois 401, no such nick
 				"regexp" => ":%s 401 %s (.+?) :(.+?)$" % [bot.server, bot.nick], 

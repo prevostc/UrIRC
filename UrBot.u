@@ -5,36 +5,78 @@ requireFile("plugins/UrUser.u");
 requireFile("plugins/UrPong.u");
 requireFile("plugins/UrEventDispatcher.u");
 
-// bot class
+/*
+This class holds all shared objects and methods of the UrIRC lib.
+This is the main object.
+
+You should read the comments of this class before writing any plugin.
+*/
 class UrIRC.UrBot {
 	
+	// main logger 
 	var log = Logger.new("UrBot");
 
-	var send = Event.new; // in
-	var recv = Event.new; // out
+	/*
+	 * recv is the main and only event while handling server messages
+	 * the UrEventDispatcher plugin listen the socket and emit recv event on known server messages
+	 * format  : <event_name:String>, <payload:Dictionary>
+	 * example : recv!("chan_msg", ["nick"=>"MyNickname", "serv"=>"login@server", "chan"=>"#chan", "msg"=>"Hello world !"]);
+	 * UrEvent Dispatcher doc provides you a list of available events.
+	 */
+	var recv = Event.new;
 
+	// this UrSocket emit an event on each received line
 	var client = nil;
+
+	// server name String
 	var server = nil;
+
+	// server port (integer)
 	var port = nil;
+
+	// irc bot nickname
 	var nick = nil;
 	
-	var chans = nil;
-	var users = nil;
+	/* 
+	 * Protected Dictionary holding the known chans as UrChan objects
+	 * element : <chan_name:String> => <chan_object:UrChan>
+	 * example : "#chan" => UrChan_0xffffffff
+	 * In fact, each UrChan object already contains the chan name, but search is speeded up by this Dictionary index. 
+	 * chan_name DOES have a sharp as first char, but you don't mind if you use UrBot.getChan
+	 */
+	var _chans = nil;
+	
+	/* 
+	 * Protected Dictionary holding the known users as UrUser objects
+	 * element : <user@host:String> => <user_object:UrUser>
+	 * example : "jack@irc.host.com" => UrChan_0xffffffff
+	 * In fact each UrChan object already contains the chan name, but search is speeded up by this Dictionary index. 
+	 * acces via UrBot.getUser
+	 */
+	var _users = nil;
 
+	/* 
+	 * Constructor
+	 * Create a UrSocket, and load the following core plugins 
+	 * 	UrEventDispatcher  
+	 * 		-> Listen UrSocket events and emit meaningfull recv events
+	 * 	UrPong
+	 * 		-> Automated answer to PING request
+	 * @param String server_url : Url of the irc server. Ex: irc.iiens.net
+	 * @param Float|integer port_nb : Server irc port. Float object are used to represent integers.
+	 * @param String nickname : Bot nickname for this session.
+	 * 
+	 * Example : 
+	 * 	var bot = UrIRC.UrBot.new("irc.iiens.net", 6667, "Urbot");
+	 */
 	function init(server_url, port_nb, nickname) {
 		// init object vars
-		server = server_url|
-		port = port_nb|
-		nick = nickname|
-		client = UrIRC.UrSocket.new|
-		chans = Dictionary.new|
-		users = Dictionary.new|
-
-		// send command handler
-		at (send?(var msgs)) {
-			for| (var msg : msgs)
-				write(msg);
-		};
+		server = server_url;
+		port = port_nb;
+		nick = nickname;
+		client = UrIRC.UrSocket.new;
+		_chans = Dictionary.new;
+		_users = Dictionary.new;
 
 		// ==== start core plugins
 		// handle socket messages and emit meaningfull events
@@ -43,67 +85,120 @@ class UrIRC.UrBot {
 		UrIRC.UrPong.new(this).load;
 	};
 	
-	// connection function
+	/*
+	 * Establish connection between this bot and the irc server
+	 */
 	function connect() {
-		// connect action
+		// socket connection start
 		client.connect(server, port);
-		write("USER urbot uurbot uuurbot : UrBot");
-		write("NICK " + nick);
+	
+		// send irc commands
+		send("USER urbot uurbot uuurbot : UrBot");
+		send("NICK " + nick);
 	};
 
-	// private write function
-	function write(msg) {
-		log.err << msg;
+	/*
+	 * Send textual informations to the irc server, adding a \n at the end.
+	 * @param String msg : This string will be send to the server, adding a \n at the end.
+	 */
+	function send(msg) {
+		log.log << "SENDING : " + msg |
 		client.write(msg + "\n");
 	};
 
+	/*
+	 * Display usefull information instead of object address on serialization.
+	 * @return String : UrBot summary.
+	 */
 	function asString() {
 		"Urbot : [%s@%s:%s]" % [nick,server,port]; 
 	};
 
-	function getChan(name) {	
-		if (chans.has(name.toLower)) {
-			chans[name.toLower]
+
+	/*
+	 * Return the UrChan object corresponding to the chan name.
+	 * 	Does nothing else if this chan is already known.
+	 * 	Create a new UrChan object and call his "join" slot if this chan is unknown. 
+	 * This feature in pure OOP should be in a UrChanManager object.
+	 * 
+	 * @param String name : Irc chan name. Have to begin with a '#'.
+	 * @return UrChan : The corresponding UrChan object.
+	 */
+	function getChan(name) {
+		if (_chans.has(name.toLower)) {
+			_chans[name.toLower]
 		} else { 	
 			var chan = UrIRC.UrChan.new(this, name.toLower)|
-			chans[chan.name] = chan|
+			_chans[chan.name] = chan|
 			chan.join;
 			chan;
 		};
 	};
+	
+	/*
+	 * Return the UrUser object corresponding to the user nick name and/or user and host.
+	 *
+	 * Does nothing else if this user is already known.
+	 *
+	 * Important notes : 
+	 * 	- "userAndHost" is optional, but providing it will speed this slot up.
+	 * 	- If this user is unknown, and "userAndHost" is NOT provided, this method will :
+	 *		1- send a WHOIS command to the server
+	 * 		2- wait for server reply
+	 * 		3- return the corresponding UrUser if the server know this nick, nil if not.
+	 *
+	 * This feature in pure OOP should be in a UrUserManager object.
+	 * 
+	 * @param String nick : User nick name.
+	 * @param String loginAndHost : User login on host and host name serated by '@' (ex : "jack@irc.iiens.net")
+	 * @return UrUser|nil : The corresponding UrUser object, nil if this nick doesn't correspond to a user on this server.
+	 */
+	function getUser(nick, loginAndHost = nil) {
 
-	function getUser(nick, loginServ = nil) {	
-		// caller have loginServ 
-		if (!loginServ.isNil) { 
+		// caller provided userAndHost 
+		if (!loginAndHost.isNil) { 
+			// Dictionary key standardization
+			loginAndHost = loginAndHost.toLower;
 			
 			// user is already known
-			if (users.has(loginServ.toLower)) {
-				users[loginServ.toLower]
+			if (_users.has(loginAndHost)) {
+				_users[loginAndHost]
 			
-			// we don't know this user
-			} else { 	
-				var user = UrIRC.UrUser.new(this, nick, loginServ.toLower);
-				users[user.loginServ] = user;
-				user
+			// we don't know this user, but we can create it.
+			} else {  
+				// create the corresponding UrUser
+				var user = UrIRC.UrUser.new(this, nick, loginAndHost);
+				_users[user.loginAndHost] = user; // store it
+				user	// and return it
 			};
 		
-		// caller does not know loginServ
+		// caller does not know loginAndHost
 		} else {	
-			// user is already known
-			for| (var record : users) {
+			// but user is already known \o/
+			for| (var record : _users) {
 				if (record.second.nick == nick) return record.second;
 			}; 
 
-			// we don't know this user
-			this.write("WHOIS " + nick);
+			// we don't know this user enough 
+			// send a WHOIS command
+			this.send("WHOIS " + nick);
+	
+			// wait server reply 
 			waituntil(this.recv?(var event, var captures) if 
-				  (event == "whois_user" && (captures["nick"].toLower == nick.toLower)) // user found
-				|| (event == "whois_nosuchnick" && (captures["nick"].toLower == nick.toLower)) // user not found	
+				// user found
+				  (event == "whois_user" && (captures["nick"].toLower == nick.toLower)) 
+				// user not found
+				|| (event == "whois_nosuchnick" && (captures["nick"].toLower == nick.toLower)) 
 			);
+
+			// if this nick is known by this server
 			if (event == "whois_user") {
-				var user = UrIRC.UrUser.new(this, captures["nick"], captures["login"].toLower + "@" + captures["serv"].toLower);
-				users[user.loginServ] = user;
-				user
+				// create the corresponding UrUser
+				var user = UrIRC.UrUser.new(this, captures["nick"], captures["user"].toLower + "@" + captures["host"].toLower);
+				_users[user.loginAndHost] = user; // store it
+				user	// and return it
+
+			// nick unknown
 			} else {
 				nil
 			};

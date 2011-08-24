@@ -20,13 +20,13 @@ class UrIRC.UrChan : UrIRC.UrPlugin {
 	
 	function join() {
 		if (!isJoined) {
-			bot.write("JOIN " + name);
+			bot.send("JOIN " + name);
 		};
 	};
 	
 	function sendMessage(msg) {
 		if (isJoined) {
-			bot.write("PRIVMSG " + name + " :" + msg);
+			bot.send("PRIVMSG " + name + " :" + msg);
 		};
 	};
 

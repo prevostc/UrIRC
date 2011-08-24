@@ -1,4 +1,27 @@
 
+/*
+The porpose of this class is to hold all the UrIRC library.
+Every library class will be an UrIRC slot.
+By beeing a slot of Object, we make this lib accessible everywhere.
+
+One problem of urbiscript classes is that you can't access a class inside another due to the protyped programming orientation.
+Problem: 
+	class A {};	// A is now a slot of Lobby
+	
+	class B {	// B is now a slot of Lobby
+		var a = A.new	// lookup error, B does not provide an A slot
+	};
+Solution:
+	class Object.Lib {};	// Lib is now a slot of Object
+	
+	class Lib.A {}; 	// A is now a slot of Lib
+
+	class B {}
+		var a = Lib.A.new;	// ok 
+	;
+
+While adding only one slot to Object, we are now able to access all the Lib classes.
+*/
 class Object.UrIRC {
 
 
