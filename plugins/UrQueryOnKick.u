@@ -1,0 +1,24 @@
+
+requireFile("UrIRC.u");
+requireFile("UrPlugin.u");
+
+
+class UrIRC.UrQueryOnKick : UrIRC.UrPlugin {
+	var chan;
+	var msg;
+
+	function configure(params) {
+		chan = bot.getChan(params[0]);
+		msg = params[1];
+	};
+
+	load = function () {
+		at (bot.recv?("kick", var captures) if captures["chan"] == chan.name) {
+			bot.getUser(captures["kicker"], captures["serv"]).query(msg % [captures["reason"]]);
+                };
+	};
+};
+
+
+
+

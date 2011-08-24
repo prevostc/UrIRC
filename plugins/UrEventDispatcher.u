@@ -32,6 +32,16 @@ class UrIRC.UrEventDispatcher : UrIRC.UrPlugin {
 				"recv_code" => "whois_nosuchnick", 
 				"captures" => ["nick", "msg"]
 			],
+			[ // kick message
+				"regexp" => ":(.+?)!(.+?) KICK (#.+?) (.+?) :(.+?)$", 
+				"recv_code" => "kick", 
+				"captures" => ["kicker", "serv", "chan", "kicked", "reason"]
+			],
+			[ // query
+				"regexp" => ":(.+?)!(.+?) PRIVMSG %s :(.+?)$" % [bot.nick], 
+				"recv_code" => "query", 
+				"captures" => ["nick", "serv", "msg"]
+			],
 		];
 	};
 

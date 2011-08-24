@@ -12,14 +12,12 @@ class UrIRC.UrUser : UrIRC.UrPlugin {
 		loginAndHost = params[1].toLower;
 	};
 	
-	function join() {
-		if (!isJoined) {
-			bot.send!(["JOIN " + name]);
-		};
+	function query(msg) {
+		bot.send("PRIVMSG " + nick + " :" + msg);
 	};
 	
 	function asString() {
 		"UrUser: " + nick + "(" + loginAndHost + ")";
-	}
+	};
 };
 

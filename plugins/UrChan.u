@@ -16,6 +16,10 @@ class UrIRC.UrChan : UrIRC.UrPlugin {
 			_isJoined = true|
 			joined!;
 		};
+
+		at (bot.recv?("kick", var captures) if captures["chan"] == name && captures["kicked"] == bot.nick) {
+			_isJoined = false;
+		};
 	};
 	
 	function join() {

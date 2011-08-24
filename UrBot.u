@@ -76,7 +76,7 @@ class UrIRC.UrBot {
 		nick = nickname;
 		client = UrIRC.UrSocket.new;
 		_chans = Dictionary.new;
-		_users = Dictionary.new;
+		_users = List.new;
 
 		// ==== start core plugins
 		// handle socket messages and emit meaningfull events
@@ -141,11 +141,16 @@ class UrIRC.UrBot {
 	 * Does nothing else if this user is already known.
 	 *
 	 * Important notes : 
-	 * 	- "userAndHost" is optional, but providing it will speed this slot up.
-	 * 	- If this user is unknown, and "userAndHost" is NOT provided, this method will :
-	 *		1- send a WHOIS command to the server
-	 * 		2- wait for server reply
-	 * 		3- return the corresponding UrUser if the server know this nick, nil if not.
+	 * 	- If this user is unknown, and "loginAndHost" is NOT provided, this method will :
+	 * 		1- search the known UrUser List and fail to find the good one
+	 *		2- send a WHOIS command to the server
+	 * 		3- wait for server reply
+	 * 		4- create the corresponding UrUser if the server know this nick, nil if not.
+	 * 		5- return this result
+	 *	- If this user is unknown, and "loginAndHost" IS provided, this method will :
+	 * 		1- search the known UrUser List and fail to find the good one
+	 * 		2- create the corresponding UrUser.
+	 * 		3- return the UrUser.
 	 *
 	 * This feature in pure OOP should be in a UrUserManager object.
 	 * 
@@ -160,23 +165,23 @@ class UrIRC.UrBot {
 			// Dictionary key standardization
 			loginAndHost = loginAndHost.toLower;
 			
-			// user is already known
-			if (_users.has(loginAndHost)) {
-				_users[loginAndHost]
+			// user already known \o/
+			for| (var user : _users) {
+				if (user.nick == nick && user.loginAndHost == loginAndHost) 
+				return user;
+			}; 
 			
 			// we don't know this user, but we can create it.
-			} else {  
-				// create the corresponding UrUser
-				var user = UrIRC.UrUser.new(this, nick, loginAndHost);
-				_users[user.loginAndHost] = user; // store it
-				user	// and return it
-			};
+			// create the corresponding UrUser
+			var user = UrIRC.UrUser.new(this, nick, loginAndHost);
+			_users << user; // store it
+			user	// and return it
 		
 		// caller does not know loginAndHost
 		} else {	
 			// but user is already known \o/
-			for| (var record : _users) {
-				if (record.second.nick == nick) return record.second;
+			for| (var user : _users) {
+				if (user.nick == nick) return user;
 			}; 
 
 			// we don't know this user enough 
@@ -195,7 +200,7 @@ class UrIRC.UrBot {
 			if (event == "whois_user") {
 				// create the corresponding UrUser
 				var user = UrIRC.UrUser.new(this, captures["nick"], captures["user"].toLower + "@" + captures["host"].toLower);
-				_users[user.loginAndHost] = user; // store it
+				_users << user; // store it
 				user	// and return it
 
 			// nick unknown
