@@ -1,7 +1,18 @@
 requireFile("UrIRC.u");
 
-// socket sending event on each received line
+/*
+ * Socket sending event on each received line.
+ * The basic Urbiscript Socket class does not fit Irc needs,
+ * on poll, you get a messy block of text composed of every received chars since last poll.
+ * In fact, you may be polling while receiving data.
+ *
+ * This is why Socket is extended by this class.
+ *
+ * UrSocket listen to a Socket and emit an event every time a string terminated by \n or \r\n is received.
+ * Every IRC server message now get's his own event emit.
+ */
 class UrIRC.UrSocket {
+	// Logger class, debug and monitoring purpose.
 	var log = Logger.new("UrSocket");
 	var client = nil;
 	var line_rest = nil;

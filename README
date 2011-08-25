@@ -1,0 +1,26 @@
+1. What is urbiscript ? 
+
+The urbiscript language is the key feature of the URBI project. (http://en.wikipedia.org/wiki/URBI)
+
+It acts a bit like python or LUA for scripting, but it has some unique features to handle parallel and event-driven programming that are directly available inside the language semantics, which makes programming complex interactions surprisingly easy. 
+
+An example of the kind of things you can write:
+
+========= High level piece of code from a virtual 3D game
+var entity = Entity.new("somemesh.mesh", size, position, orientation);
+
+// react to events or conditions:
+at (entity.touched?()) echo("boom!");
+at (entity.x < 10) entity.gears(deploy);
+
+// use '&' to run two pieces of code in parallel:
+some_complex_code(entity) & some_other_code(entity); 
+
+// use a comma to detach code in the background...
+// ... and use 'tags' to control it:
+mytag: { some code that takes a long time },
+at (Keyboard.pressed?) mytag.stop; 
+=========
+
+The UObject component architecture, allows developers to interface any C++ object within Urbi, making selected methods and attributes visible in the script language, while in fact being C++ code. Special notifiers can be set on any of the object's attributes to notify the C++ side of any change on these attributes on the urbiscript/Urbi side.
+

@@ -1,20 +1,59 @@
 
 requireFile("UrIRC.u");
 
+
+/*
+ * This class provide a base structure of a class accessing the UrBot data. 
+ * Please ensure that your plugin does nothing before the start call and after the stop call.
+ * This feature avoid complete script reload (and bot deconnection) while reloading a plugin.
+ */
 class UrIRC.UrPlugin {
+	// the UrBot class 
 	var bot = nil;
+
+	/* 
+	 * This init function call configure with a List of arguments equal to the init arguments exept the first
+	 * This is a hack, I will change this behaviour (or not) if urbiscript support the "super" keyword.
+	 *
+	 * Example : 
+	 * class UrIRC.UrExample : UrIRC.UrPlugin {
+	 *	function configure(params) {
+	 *		for (var param : params) echo(param);
+	 *	}
+	 * }
+	 * var bot = UrIRC.UrBot.new(...);
+	 * // here configure will have this list as argument [42, "Hello world", [1, 2]]
+	 * UrIRC.UrExample.new(bot, 42, "Hello world", [1, 2]);
+	 * 
+	 *
+	 * @param UrBot bot : the UrBot class
+	 */
 	function init {
 		var args = call.evalArgs;
 		bot = args[0];
 		configure(args.tail);
 	};
+
+	/* 
+	 * Default configure slot does nothing
+	 * You certainly want to override this slot
+	 * configure should not start jobs or routines but just load and save what it needs.
+	 */
 	var configure = function(params){};
-	var load = function() {};
-	var unload = function() {};
-	var reload = function() {
-		this.unload;
-		this.load;
-	};
+
+	/*
+	 * Default start slot does nothing
+	 * You certainly want to override this slot
+	 * This slot should actually do some work and declare your watchdogs
+	 */
+	var start = function() {};
+		
+	/*
+	 * Default stop slot does nothing
+	 * You certainly want to override this slot 
+	 * This slot should actually stop everything that your plugin may be working on
+	 */
+	var stop = function() {};
 };
 
 
