@@ -10,16 +10,33 @@ requireFile("UrIRC.u");
  *
  * UrSocket listen to a Socket and emit an event every time a string terminated by \n or \r\n is received.
  * Every IRC server message now get's his own event emit.
+ *
+ * This class have to provide the same interface as Socket
  */
 class UrIRC.UrSocket {
 	// Logger class, debug and monitoring purpose.
 	var log = Logger.new("UrSocket");
+
+	// the Socket standard object
 	var client = nil;
+
+	// previous poll not terminated message 
 	var line_rest = nil;
+
+	// This event is emitted on every server message
 	var received = Event.new; // out
 
+	// Socket.poll every pollTime
+	// Have to be higher than the message processing time of your application
+	var pollTime = 500ms;
+
+	// just create a new Socket
 	function init() {
 		client = Socket.new;
+	};
+	
+	// declare Socket.received watchdog, error watchdog, Socket regular poll and Socket connect
+	function connect(server, port) {
 		// error handling
 		at (this.client.disconnected?) 	{log.err << "Socket client disconnected"};
 		at (this.client.error?)		{log.err << "Socket client disconnected"};
@@ -40,11 +57,15 @@ class UrIRC.UrSocket {
 			// send an event for each message
 			for (var line : lines) {received!(line)};
 		};
-	};
 	
-	function connect(server, port) {
+		// necessary Socket poll
+		every (pollTime)
+			Socket.poll,
+		
+		// connect the real socket
 		client.connect(server, port);
 	};
 
+	// send a message through the real socket
 	function write(msg) {client.write(msg)};
 };

@@ -6,9 +6,6 @@ requireFile("plugins/UrAutoKick.u");
 requireFile("plugins/UrQueryOnKick.u");
 
 
-// urbi necessary socket poll
-every (500ms)
-	Socket.poll,
 
 var bot = UrIRC.UrBot.new("irc.iiens.net", 6667, "Urbot");
 bot.connect;
