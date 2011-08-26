@@ -2,20 +2,38 @@
 requireFile("UrIRC.u");
 requireFile("UrPlugin.u");
 
-
+/*
+ * Send query message to the user who kicked our bot
+ */
 class UrIRC.UrQueryOnKick : UrIRC.UrPlugin {
+
+	// UrChan : chan object
 	var chan;
+
+	// message to send. May contain a %s that will be replace by the kick reason.
 	var msg;
 
+	/*
+	 * Pseudo init method @see UrPlugin:init
+	 * @param String name : Chan name. Begin with a '#'
+	 * @param String msg : Message to send. May contain a %s that will be replace by the kick reason.
+	 */
 	function configure(params) {
 		chan = bot.getChan(params[0]);
 		msg = params[1];
 	};
 
-	load = function () {
-		at (bot.recv?("kick", var captures) if captures["chan"] == chan.name) {
-			bot.getUser(captures["kicker"], captures["serv"]).query(msg % [captures["reason"]]);
-                };
+	/*
+	 * Declare a kick watchdog.
+	 */
+	function start() {
+		_jobs : {
+			// on bot kicked
+			at (bot.recv?("kick", var captures) if captures["chan"] == chan.name && captures["kicked"] == bot.nick) {
+				// send query to this user
+				bot.getUser(captures["kicker"], captures["serv"]).query(msg % [captures["reason"]]);
+			};
+		};
 	};
 };
 

@@ -27,3 +27,13 @@ class Object.UrIRC {
 
 };
 
+
+/*
+ * Load all plugins
+ * Soon : autoload
+ */
+requireFile("UrBot.u");
+requireFile("plugins/UrHelloWorld.u");
+requireFile("plugins/UrParrot.u");
+requireFile("plugins/UrAutoKick.u");
+requireFile("plugins/UrQueryOnKick.u");

@@ -24,3 +24,19 @@ at (Keyboard.pressed?) mytag.stop;
 
 The UObject component architecture, allows developers to interface any C++ object within Urbi, making selected methods and attributes visible in the script language, while in fact being C++ code. Special notifiers can be set on any of the object's attributes to notify the C++ side of any change on these attributes on the urbiscript/Urbi side.
 
+
+2. UrIRC manual
+
+Coming soon...
+@see files comments
+
+2.1. Usage
+
+Coming soon...
+@see main.u
+
+2.2. Guide me : write a plugin
+
+Coming soon...
+@see UrPlugin.u 
+@see plugins/*.u

@@ -2,18 +2,34 @@
 requireFile("UrIRC.u");
 requireFile("UrPlugin.u");
 
-
+/*
+ * Repeat all users messages on a particular chan
+ */
 class UrIRC.UrParrot : UrIRC.UrPlugin {
+
+	// UrChan : chan object
 	var chan;
 
+	/*
+	 * Pseudo init method @see UrPlugin:init
+	 * @param String name : Chan name. Begin with a '#'
+	 */
 	function configure(params) {
+		// get the chan object
 		chan = bot.getChan(params[0]);
 	};
 
-	load = function () {
-		at (bot.recv?("chan_msg", var captures) if captures["chan"] == chan.name) {
-			chan.sendMessage(captures["nick"] + ": " + captures["msg"]);
-                };
+	/*
+	 * Declare watchdogs on user messages.
+	 */
+	function start() {
+		_jobs : {
+			// on server message from this chan
+			at (bot.recv?("chan_msg", var captures) if captures["chan"] == chan.name) {
+				// repeat this message
+				chan.sendMessage(captures["nick"] + ": " + captures["msg"]);
+			};
+		};
 	};
 };
 

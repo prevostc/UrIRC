@@ -82,7 +82,7 @@ class UrIRC.UrBot {
 		// handle socket messages and emit meaningfull events
 		UrIRC.UrEventDispatcher.new(this).start;
 		// answer pong to ping
-		UrIRC.UrPong.new(this).load;
+		UrIRC.UrPong.new(this).start;
 	};
 	
 	/*

@@ -2,10 +2,22 @@
 requireFile("UrIRC.u");
 requireFile("UrPlugin.u");
 
+
+/*
+ * Automated ping request answer plugin.
+ */
 class UrIRC.UrPong : UrIRC.UrPlugin {
-	load = function () {
-		at (bot.recv?("ping", var captures)) {
-			bot.write("PONG " + captures["payload"]);
+
+	/*
+	 * Declare watchdog listening to ping requests
+	 */
+	function start() {
+		_jobs : {
+			// on ping
+			at (bot.recv?("ping", var captures)) {
+				// answer pong !
+				bot.send("PONG " + captures["payload"]);
+			};
 		};
 	};
 };

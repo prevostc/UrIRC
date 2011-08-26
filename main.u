@@ -1,22 +1,23 @@
 
-requireFile("UrBot.u");
-requireFile("plugins/UrHelloWorld.u");
-requireFile("plugins/UrParrot.u");
-requireFile("plugins/UrAutoKick.u");
-requireFile("plugins/UrQueryOnKick.u");
+requireFile("UrIRC.u");
 
-
-
+// create bot object
 var bot = UrIRC.UrBot.new("irc.iiens.net", 6667, "Urbot");
 bot.connect;
 
-UrIRC.UrQueryOnKick.new(bot, "#urbot", "Is '%s' a sufficient reason ?").load;
-UrIRC.UrHelloWorld.new(bot, "#urbot").load;
-UrIRC.UrParrot.new(bot, "#urbot2").load;
-UrIRC.UrAutoKick.new(bot, "#urbot2").load;
+// add plugins
 
-echo(bot.getUser("UrBot"));
-//echo(bot.getUser("Clement"));
-//echo(bot.getUser("azfzegekzprfjo"));i
+// don't kick me please 
+UrIRC.UrQueryOnKick.new(bot, "#urbot", "Is '%s' a sufficient reason ?").start;
+
+// hello world on #urbot
+UrIRC.UrHelloWorld.new(bot, "#urbot").start;
+
+// the famous annoying plugin
+UrIRC.UrParrot.new(bot, "#urbot2").start;
+
+// still in dev
+UrIRC.UrAutoKick.new(bot, "#urbot2").start;
+
 
 

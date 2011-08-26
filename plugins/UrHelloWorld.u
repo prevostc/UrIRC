@@ -2,20 +2,36 @@
 requireFile("UrIRC.u");
 requireFile("UrPlugin.u");
 
+/*
+ * Connect to a chan and say "Hello World"
+ */
 class UrIRC.UrHelloWorld : UrIRC.UrPlugin {
+
+	// UrChan : chan object
 	var chan;
 
+	/*
+	 * Pseudo init method @see UrPlugin:init
+	 * @param String name : Chan name. Begin with a '#'
+	 */
         function configure(params) {
                 chan = bot.getChan(params[0]);
         };
-	
-	function load() {
-		if (chan.isJoined) hello
-		else at (chan.joined?) {hello};
+
+	/*
+	 * Send message to this chan.
+	 */
+	function start() {
+		_jobs : {
+			if (chan.isJoined) hello
+			else at (chan.joined?) hello;
+		};
 	};
 
-	// code factorization methods
-	function hello() {
+	/*
+	 * send "Hello world" to the specified chan
+	 */
+	function hello() {	
 		chan.sendMessage("Hello World");
 	};
 };

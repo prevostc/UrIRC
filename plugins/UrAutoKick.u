@@ -11,13 +11,15 @@ class UrIRC.UrAutoKick : UrIRC.UrPlugin {
 		chan = bot.getChan(params[0]);
 	};
 
-	load = function () {
-		at (bot.recv?("chan_join", var captures) if captures["chan"] == chan.name) {
-			var user = bot.getUser(captures["nick"], captures["serv"]);
-                };
-		
-		at (bot.recv?("nick_change", var captures)) {
-                        echo("nick change detected with regexp : " + regexp);	
+	function start() {
+		_jobs : {
+			at (bot.recv?("chan_join", var captures) if captures["chan"] == chan.name) {
+				var user = bot.getUser(captures["nick"], captures["serv"]);
+			};
+			
+			at (bot.recv?("nick_change", var captures)) {
+				echo("nick change detected with regexp : " + regexp);	
+			};
 		};
 	};
 };
