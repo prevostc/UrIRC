@@ -29,7 +29,7 @@ class UrIRC.UrChan : UrIRC.UrPlugin {
 	var _jobs = nil;
 
 	/*
-	 * Pseudo init method
+	 * Pseudo init method @see UrPlugin:init
 	 * @param String name : Chan name. Begin with a '#'
 	 */
 	function configure(params) {

@@ -2,22 +2,53 @@
 requireFile("UrIRC.u");
 requireFile("UrPlugin.u");
 
+/*
+ * Holds user data and states
+ * Synchronize object state (nick) with server messages
+ * Can query a user
+ */
 class UrIRC.UrUser : UrIRC.UrPlugin {
 
+	// String : User nickname
 	var nick = nil;
+
+	/*
+	 *  String : User host identifier
+	 *  format : <login on host>@<host url>
+	 *  example : root@iiens.net
+	 */
 	var loginAndHost = nil;
 
+	/*
+	 * Pseudo init method @see UrPlugin:init
+	 * @param String nick : User nick name
+	 * @param String loginAndHost : User login and host
+	 */
 	function configure(params) {
 		nick = params[0];
 		loginAndHost = params[1].toLower;
 	};
 	
+	/*
+	 * Send a query message to this user
+	 * @param String msg : Message to send
+	 */
 	function query(msg) {
 		bot.send("PRIVMSG " + nick + " :" + msg);
 	};
 	
+	/*
+	 * Display candy
+	 */
 	function asString() {
 		"UrUser: " + nick + "(" + loginAndHost + ")";
+	};
+
+	// does nothing yet, but soon
+	function start() {
+		_jobs : {
+			
+		};
 	};
 };
 

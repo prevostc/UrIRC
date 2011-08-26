@@ -1,27 +1,67 @@
 requireFile("UrIRC.u");
 requireFile("UrPlugin.u");
 
+
+/*
+ * This class listend to server messages and emit meaningfull events via Urbot.recv
+ * It was designed in a particular way, handling every IRC messages is hard/impossible,
+ * so we needed a flexible and scalable structure in which we are able to easily add matching cases
+ */
 class UrIRC.UrEventDispatcher : UrIRC.UrPlugin {
 
+	// parsonal Logger, awesome !
 	var log = Logger.new("UrEventDispatcher");
+
+	/*
+	 * List : server messages parsing data
+	 * This data structure is very handy, it holds all matches data used by server message parsing.
+	 * The full documentation of each recv events will be edited when this class will handle a large bunch of irc server messages.
+	 * His structure is quite intuitive, feel free to dump it and find the perfect event for your task
+	 * format : 
+	 * 	List of "parsing data"
+	 * 	Parsing data format (Dictionary) :
+	 * 		"regexp" 	: if regexp match, UrBot.recv is emited
+	 * 		"recv_code" 	: recv first argument, server message identifier
+	 *		"captures"	: "regexp" may capture data, this List gives a name to each captures
+	 *
+	 * example : 
+	 * 	server message 	: "PING hello 42"
+	 * 	parsing data 	: 	["regexp" 	=> "^PING (.+?) (.+?)$",
+	 * 				"recv_code" 	=> "ping",
+	 * 				"captures" 	=> ["word1", "word2"]]
+	 * 	emitted event 	: recv!("ping", ["word1" => "hello", "word2" => "42"]);
+	 *
+	 * Notice: 
+	 * By using Dictionaries, we get rid of the list order and give a meaning to each data.
+	 */
 	var match_map = nil;
 
-        load = function() {
-		
-		loadMatchMap();
-
-                // set socket messages handler on load
-                at (bot.client.received?(var msg)) {
-                        parse(msg);
-                };
-        };
-
+	/*
+	 * Load the match map data structure
+	 * I hope some day these data will be taken from a database
+	 */
 	function loadMatchMap() {
 		match_map = [
-			["regexp" => "^PING (.+)$", "recv_code" => "ping", "captures" => ["payload"]],
-			["regexp" => ":(.+?)!(.+?) PRIVMSG (#.+?) :(.+?)$", "recv_code" => "chan_msg", "captures" => ["nick", "serv", "chan", "msg"]],
-			["regexp" => ":(.+?)!(.+?) JOIN :(#.+?)$", "recv_code" => "chan_join", "captures" => ["nick", "serv", "chan"]],
-			["regexp" => ":(.+?)!(.+?) NICK (.+?)$", "recv_code" => "nick_change", "captures" => ["old_nick", "serv", "new_nick"]],
+			[ // ping 
+				"regexp" => "^PING (.+)$", 
+				"recv_code" => "ping", 
+				"captures" => ["payload"]
+			],
+			[ //chan message
+				"regexp" => ":(.+?)!(.+?) PRIVMSG (#.+?) :(.+?)$", 
+				"recv_code" => "chan_msg", 
+				"captures" => ["nick", "serv", "chan", "msg"]
+			],
+			[ // chan join
+				"regexp" => ":(.+?)!(.+?) JOIN :(#.+?)$", 
+				"recv_code" => "chan_join", 
+				"captures" => ["nick", "serv", "chan"]
+			],
+			[ // nick change
+				"regexp" => ":(.+?)!(.+?) NICK (.+?)$", 
+				"recv_code" => "nick_change", 
+				"captures" => ["old_nick", "serv", "new_nick"]
+			],
 			[ // whois 311, contains user login, server and real name
 				"regexp" => ":%s 311 %s (.+?) (.+?) (.+?) \\* :(.+?)$" % [bot.server, bot.nick], 
 				"recv_code" => "whois_user", 
@@ -45,23 +85,50 @@ class UrIRC.UrEventDispatcher : UrIRC.UrPlugin {
 		];
 	};
 
-        // parse a server message and trigger the corresponding event
-        function parse(msg) {
+	/*
+	 * Load match map and start socket message watchdog.
+	 */
+        function start() {
+		_jobs : {
+			// load match data
+			loadMatchMap();
+
+			// set socket messages handler on load
+			at (bot.client.received?(var msg)) {
+				_parse(msg);
+			};
+
+		};
+        };
+
+        /*
+	 * Parse a server message and trigger the corresponding event using match_map
+	 * Match_map contains all the information, this method mix them together
+	 */
+        function _parse(msg) {
+
                 // for each match
                 for (var map : match_map) {
+
                         // create the regexp object
                         var re = Regexp.new(map["regexp"]);
+
+			// match server message with regexp
                         if (re.match(msg)) {
-                                // build the captures dictionnary
+
+                                // build the captures 
                                 var captures = Dictionary.new;
                                 for (var i = 0 ; i < map["captures"].size ; i+=1 )
                                         captures[map["captures"][i]] = re.matches[i+1];
 
+				// debug message
                                 log.log << "MATCHED MSG : " + map["recv_code"] + captures;
 
-                                // emit the good event
+                                // emit the right event
                                 bot.recv!(map["recv_code"], captures);
-                                return true;
+				
+				// return, only one match/recv event by server message
+				return true;
                         };
                 };
                	log.err << "UNKNOWN MSG : " + msg;
