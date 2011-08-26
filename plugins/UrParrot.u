@@ -1,6 +1,4 @@
 
-requireFile("UrIRC.u");
-requireFile("UrPlugin.u");
 
 /*
  * Repeat all users messages on a particular chan

@@ -1,6 +1,4 @@
 
-requireFile("UrIRC.u");
-requireFile("UrPlugin.u");
 
 
 class UrIRC.UrAutoKick : UrIRC.UrPlugin {

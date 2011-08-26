@@ -1,5 +1,3 @@
-requireFile("UrIRC.u");
-requireFile("UrPlugin.u");
 
 
 /*

@@ -30,10 +30,19 @@ class Object.UrIRC {
 
 /*
  * Load all plugins
- * Soon : autoload
+ * Soon : autoload plugins
+ * Urbi error in case of recursive require : NOTHING.
+ * This is the reason of this "lib scale" require
  */
 requireFile("UrBot.u");
+requireFile("UrPlugin.u");
+requireFile("UrSocket.u");
+requireFile("plugins/UrChan.u");
+requireFile("plugins/UrUser.u");
+requireFile("plugins/UrPong.u");
+requireFile("plugins/UrEventDispatcher.u");
 requireFile("plugins/UrHelloWorld.u");
 requireFile("plugins/UrParrot.u");
 requireFile("plugins/UrAutoKick.u");
 requireFile("plugins/UrQueryOnKick.u");
+

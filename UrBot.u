@@ -1,10 +1,4 @@
 
-requireFile("UrSocket.u");
-requireFile("plugins/UrChan.u");
-requireFile("plugins/UrUser.u");
-requireFile("plugins/UrPong.u");
-requireFile("plugins/UrEventDispatcher.u");
-
 /*
 This class holds all shared objects and methods of the UrIRC lib.
 This is the main object.

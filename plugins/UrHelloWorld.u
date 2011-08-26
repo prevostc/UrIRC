@@ -1,7 +1,4 @@
 
-requireFile("UrIRC.u");
-requireFile("UrPlugin.u");
-
 /*
  * Connect to a chan and say "Hello World"
  */
@@ -24,7 +21,7 @@ class UrIRC.UrHelloWorld : UrIRC.UrPlugin {
 	function start() {
 		_jobs : {
 			if (chan.isJoined) hello
-			else at (chan.joined?) hello;
+			else at (chan.joined?) {hello};
 		};
 	};
 

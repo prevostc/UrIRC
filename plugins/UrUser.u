@@ -1,7 +1,4 @@
 
-requireFile("UrIRC.u");
-requireFile("UrPlugin.u");
-
 /*
  * Holds user data and states
  * Synchronize object state (nick) with server messages
