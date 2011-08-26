@@ -11,6 +11,12 @@ class UrIRC.UrPlugin {
 	// the UrBot class 
 	var bot = nil;
 
+	/*
+	 * Tag holding watchdogs and background jobs
+	 * Used by start and stop
+	 */
+	var _jobs = nil;
+
 	/* 
 	 * This init function call configure with a List of arguments equal to the init arguments exept the first
 	 * This is a hack, I will change this behaviour (or not) if urbiscript support the "super" keyword.
@@ -31,6 +37,7 @@ class UrIRC.UrPlugin {
 	function init {
 		var args = call.evalArgs;
 		bot = args[0];
+		_jobs = Tag.new;
 		configure(args.tail);
 	};
 
@@ -44,16 +51,25 @@ class UrIRC.UrPlugin {
 	/*
 	 * Default start slot does nothing
 	 * You certainly want to override this slot
-	 * This slot should actually do some work and declare your watchdogs
+	 * This slot should actually do some work and declare your watchdogs inside the _jobs tag
 	 */
 	var start = function() {};
 		
 	/*
-	 * Default stop slot does nothing
-	 * You certainly want to override this slot 
+	 * Default stop slot just stop rinnung jobs
 	 * This slot should actually stop everything that your plugin may be working on
+	 * Feel free to override it, but keep the same semantic
+	 * 
+	 * Notice: 
+	 * Don't forget that Tag.clone create a "child" Tag which is also stopped by his parent stop.
+	 * With this property, you can create your own tags, childs of _jobs and keep this slot
+	 *
+	 * @return UrPlugin this : current object
 	 */
-	var stop = function() {};
+	var stop = function() {
+		_jobs.stop;
+		this;
+	};
 };
 
 

@@ -38,11 +38,12 @@ class UrIRC.UrSocket {
 	// declare Socket.received watchdog, error watchdog, Socket regular poll and Socket connect
 	function connect(server, port) {
 		// error handling
-		at (this.client.disconnected?) 	{log.err << "Socket client disconnected"};
-		at (this.client.error?)		{log.err << "Socket client disconnected"};
+		at (client.disconnected?) 	{log.err << "Socket client disconnected"};
+		at (client.error?)		{log.err << "Socket client disconnected"};
 		
 		// define callback on data poll
-		at (this.client.received?(var msg)) {	
+		at (client.received?(var msg)) {	
+
 			// append last cutted line if exists
 			var data = {if (line_rest != nil) {line_rest + msg} else msg;}|
 			
@@ -57,15 +58,13 @@ class UrIRC.UrSocket {
 			// send an event for each message
 			for (var line : lines) {received!(line)};
 		};
-	
-		// necessary Socket poll
-		every (pollTime)
-			Socket.poll,
 		
 		// connect the real socket
 		client.connect(server, port);
 	};
 
 	// send a message through the real socket
-	function write(msg) {client.write(msg)};
+	function write(msg) {
+		client.write(msg)
+	};
 };

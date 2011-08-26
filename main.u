@@ -10,8 +10,6 @@ requireFile("plugins/UrQueryOnKick.u");
 var bot = UrIRC.UrBot.new("irc.iiens.net", 6667, "Urbot");
 bot.connect;
 
-
-
 UrIRC.UrQueryOnKick.new(bot, "#urbot", "Is '%s' a sufficient reason ?").load;
 UrIRC.UrHelloWorld.new(bot, "#urbot").load;
 UrIRC.UrParrot.new(bot, "#urbot2").load;

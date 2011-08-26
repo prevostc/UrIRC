@@ -89,6 +89,7 @@ class UrIRC.UrBot {
 	 * Establish connection between this bot and the irc server
 	 */
 	function connect() {
+
 		// socket connection start
 		client.connect(server, port);
 	
@@ -130,7 +131,7 @@ class UrIRC.UrBot {
 		} else { 	
 			var chan = UrIRC.UrChan.new(this, name.toLower)|
 			_chans[chan.name] = chan|
-			chan.join;
+			chan.start;
 			chan;
 		};
 	};

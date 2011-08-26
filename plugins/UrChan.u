@@ -2,44 +2,90 @@
 requireFile("UrIRC.u");
 requireFile("UrPlugin.u");
 
+
+/*
+ * Holds chan data and states
+ * Synchronize object state (isJoined) with server messages
+ * Can connect to a chan and part/quit a chan. 
+ */
 class UrIRC.UrChan : UrIRC.UrPlugin {
 
+	// chan name
 	var name = nil;
+
+	// chan cennection event
 	var joined = nil;
+
+	// chan disconnection event
+	var quitted = nil;
+
+	// protected chan status
 	var _isJoined = false;
 
+	/*
+	 * Tag holding watchdogs and background jobs
+	 * Used by start and stop
+	 */
+	var _jobs = nil;
+
+	/*
+	 * Pseudo init method
+	 * @param String name : Chan name. Begin with a '#'
+	 */
 	function configure(params) {
 		name = params[0];
 		joined = Event.new;
-
-		at (bot.recv?("chan_join", var captures) if captures["chan"] == name && captures["nick"] == bot.nick) {
-			_isJoined = true|
-			joined!;
-		};
-
-		at (bot.recv?("kick", var captures) if captures["chan"] == name && captures["kicked"] == bot.nick) {
-			_isJoined = false;
-		};
+		quitted = Event.new;
 	};
 	
+	// send a join command and wait until serv confirm
 	function join() {
 		if (!isJoined) {
+			// send join cmd
 			bot.send("JOIN " + name);
+			// wait server confirm
+			//waituntil(bot.recv?("chan_join", var captures) if captures["chan"] == name && captures["nick"] == bot.nick);
 		};
 	};
 	
+	// send a public message on this chan
 	function sendMessage(msg) {
 		if (isJoined) {
 			bot.send("PRIVMSG " + name + " :" + msg);
 		};
 	};
 
+	// chan status
 	function isJoined() {
 		_isJoined;
 	};
 
+	// display candy
 	function asString() {
 		"UrChan : " + name;
-	}
+	};
+
+	// start method override watchdogs
+	function start() {
+		_jobs : {
+			// listen to bot join on this chan	
+			at (bot.recv?("chan_join", var captures) if captures["chan"] == name && captures["nick"] == bot.nick) {
+				_isJoined = true|
+				joined!;
+			};
+
+			// chan quit error cases
+			at (bot.recv?("kick", var captures) if captures["chan"] == name && captures["kicked"] == bot.nick) {
+				_isJoined = false;
+				quitted!;
+			};
+			
+			// join this chan
+			join;
+		};
+		
+		// return this (chained methods)
+		this
+	};
 };
 
