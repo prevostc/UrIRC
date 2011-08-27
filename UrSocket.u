@@ -1,14 +1,13 @@
 
 /*
- * Socket sending event on each received line.
+ * Description: Wrapper of the urbi Socket class, sending event on each received line.
+ *
  * The basic Urbiscript Socket class does not fit Irc needs,
- * on poll, you get a messy block of text composed of every received chars since last poll.
+ * on poll, you get a block of text composed of every chars since last poll.
  * In fact, you may be polling while receiving data.
  *
- * This is why Socket is extended by this class.
- *
  * UrSocket listen to a Socket and emit an event every time a string terminated by \n or \r\n is received.
- * Every IRC server message now get's his own event emit.
+ * Every IRC server message now get's his own event.
  *
  * This class have to provide the same interface as Socket
  */
@@ -37,11 +36,14 @@ class UrIRC.UrSocket {
 	// declare Socket.received watchdog, error watchdog, Socket regular poll and Socket connect
 	function connect(server, port) {
 		// error handling
-		at (client.disconnected?) 	{log.err << "Socket client disconnected"};
-		at (client.error?)		{log.err << "Socket client disconnected"};
+		at (client.disconnected?) 	{log.err << "UrSocket : client disconnected"};
+		at (client.error?)		{log.err << "UrSocket : client error"};
 		
 		// define callback on data poll
 		at (client.received?(var msg)) {	
+
+			// log received message
+			log.debug << "UrSocket received : " + msg;
 
 			// append last cutted line if exists
 			var data = {if (line_rest != nil) {line_rest + msg} else msg;}|
