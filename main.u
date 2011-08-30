@@ -19,5 +19,5 @@ UrIRC.UrParrot.new(bot, "#urbot2").start;
 // still in dev
 UrIRC.UrAutoKick.new(bot, "#urbot2").start;
 
-
+bot.getChan("#urbot").names;
 

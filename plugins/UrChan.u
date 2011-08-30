@@ -85,5 +85,23 @@ class UrIRC.UrChan : UrIRC.UrPlugin {
 		// return this (chained methods)
 		this
 	};
+
+	// return chan user list
+	function names() {
+		// create a child job
+		var names_job = _jobs.clone;
+
+		// this tag will be stopped if _jobs is stopped
+		names_job : {
+			bot.send("NAMES " + this.name);
+		};
+	};
 };
+
+
+
+
+
+
+
 

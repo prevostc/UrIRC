@@ -21,13 +21,17 @@ class UrIRC.UrEventDispatcher : UrIRC.UrPlugin {
 	 * 		"regexp" 	: if regexp match, UrBot.recv is emited
 	 * 		"recv_code" 	: recv first argument, server message identifier
 	 *		"captures"	: "regexp" may capture data, this List gives a name to each captures
+	 *		"callbacks"	: Dictionary containing callbacks function for one or more capture name
+	 *				  Format : <capture_name:String> => <callback:function(String)>
+	 *				  Callbacks have to return a value, any type is accepted.
 	 *
 	 * example : 
 	 * 	server message 	: "PING hello 42"
 	 * 	parsing data 	: 	["regexp" 	=> "^PING (.+?) (.+?)$",
 	 * 				"recv_code" 	=> "ping",
-	 * 				"captures" 	=> ["word1", "word2"]]
-	 * 	emitted event 	: recv!("ping", ["word1" => "hello", "word2" => "42"]);
+	 * 				"captures" 	=> ["word1", "word2"],
+	 * 				"callbacks"	=> ["word2" => function(str){"world"}]]
+	 * 	emitted event 	: recv!("ping", ["word1" => "hello", "word2" => "world"]);
 	 *
 	 * Notice: 
 	 * By using Dictionaries, we get rid of the list order and give a meaning to each data.
@@ -43,42 +47,53 @@ class UrIRC.UrEventDispatcher : UrIRC.UrPlugin {
 			[ // ping 
 				"regexp" => "^PING (.+)$", 
 				"recv_code" => "ping", 
-				"captures" => ["payload"]
+				"captures" => ["payload"],
 			],
 			[ //chan message
 				"regexp" => ":(.+?)!(.+?) PRIVMSG (#.+?) :(.+?)$", 
 				"recv_code" => "chan_msg", 
-				"captures" => ["nick", "serv", "chan", "msg"]
+				"captures" => ["nick", "serv", "chan", "msg"],
 			],
 			[ // chan join
 				"regexp" => ":(.+?)!(.+?) JOIN :(#.+?)$", 
 				"recv_code" => "chan_join", 
-				"captures" => ["nick", "serv", "chan"]
+				"captures" => ["nick", "serv", "chan"],
 			],
 			[ // nick change
 				"regexp" => ":(.+?)!(.+?) NICK (.+?)$", 
 				"recv_code" => "nick_change", 
-				"captures" => ["old_nick", "serv", "new_nick"]
+				"captures" => ["old_nick", "serv", "new_nick"],
 			],
 			[ // whois 311, contains user login, server and real name
 				"regexp" => ":%s 311 %s (.+?) (.+?) (.+?) \\* :(.+?)$" % [bot.server, bot.nick], 
 				"recv_code" => "whois_user", 
-				"captures" => ["nick", "user", "host", "real_name"]
+				"captures" => ["nick", "user", "host", "real_name"],
 			],
 			[ // whois 401, no such nick
 				"regexp" => ":%s 401 %s (.+?) :(.+?)$" % [bot.server, bot.nick], 
 				"recv_code" => "whois_nosuchnick", 
-				"captures" => ["nick", "msg"]
+				"captures" => ["nick", "msg"],
 			],
 			[ // kick message
 				"regexp" => ":(.+?)!(.+?) KICK (#.+?) (.+?) :(.+?)$", 
 				"recv_code" => "kick", 
-				"captures" => ["kicker", "serv", "chan", "kicked", "reason"]
+				"captures" => ["kicker", "serv", "chan", "kicked", "reason"],
 			],
 			[ // query
 				"regexp" => ":(.+?)!(.+?) PRIVMSG %s :(.+?)$" % [bot.nick], 
 				"recv_code" => "query", 
-				"captures" => ["nick", "serv", "msg"]
+				"captures" => ["nick", "serv", "msg"],
+			],
+			[ // names reply
+				"regexp" => ":%s 353 %s = (.*?) :(.*?)$" % [bot.server, bot.nick], 
+				"recv_code" => "names", 
+				"captures" => ["chan", "users"],
+				"callbacks" => ["users" => UrIRC.UrUser.&stringToList],
+			],
+			[ // end of names
+				"regexp" => ":%s 366 %s (.*?) .*$" % [bot.server, bot.nick], 
+				"recv_code" => "names_end", 
+				"captures" => ["chan"],
 			],
 		];
 	};
@@ -87,6 +102,7 @@ class UrIRC.UrEventDispatcher : UrIRC.UrPlugin {
 	 * Load match map and start socket message watchdog.
 	 */
         function start() {
+		UrIRC.UrUser.slotNames;
 		_jobs : {
 			// load match data
 			loadMatchMap();
@@ -116,8 +132,15 @@ class UrIRC.UrEventDispatcher : UrIRC.UrPlugin {
 
                                 // build the captures 
                                 var captures = Dictionary.new;
-                                for (var i = 0 ; i < map["captures"].size ; i+=1 )
-                                        captures[map["captures"][i]] = re.matches[i+1];
+                                for (var i = 0 ; i < map["captures"].size ; i+=1 ) {
+					var current = map["captures"][i];
+					if (map.has("callbacks") && map["callbacks"].has(current)) {
+						var callback = map["callbacks"][current];
+						captures[current] = callback(re.matches[i+1]);
+					} else {
+						captures[current] = re.matches[i+1];
+					};
+				};
 
 				// debug message
                                 log.log << "MATCHED MSG : " + map["recv_code"] + captures;

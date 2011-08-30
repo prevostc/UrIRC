@@ -34,11 +34,11 @@ class Object.UrIRC {
  * Urbi error in case of recursive require : NOTHING.
  * This is the reason of this "lib scale" require
  */
-requireFile("UrBot.u");
 requireFile("UrPlugin.u");
-requireFile("UrSocket.u");
 requireFile("plugins/UrChan.u");
 requireFile("plugins/UrUser.u");
+requireFile("UrBot.u");
+requireFile("UrSocket.u");
 requireFile("plugins/UrPong.u");
 requireFile("plugins/UrEventDispatcher.u");
 requireFile("plugins/UrHelloWorld.u");

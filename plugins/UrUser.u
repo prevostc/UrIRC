@@ -47,5 +47,13 @@ class UrIRC.UrUser : UrIRC.UrPlugin {
 			
 		};
 	};
+
+	// parse a string as user list
+	// @return List[String] users : users pseudo list
+	var stringToList = function(str) {
+		var users = str.split([" +", " @", " ", "\n"]);
+		users.removeBack;
+		users;
+	};
 };
 
