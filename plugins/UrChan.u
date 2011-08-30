@@ -27,6 +27,11 @@ class UrIRC.UrChan : UrIRC.UrPlugin {
 	var _jobs = nil;
 
 	/*
+	 * List[String] : Users nicks connected on this chan
+	 */
+	var _nickList = nil;
+
+	/*
 	 * Pseudo init method @see UrPlugin:init
 	 * @param String name : Chan name. Begin with a '#'
 	 */
@@ -41,8 +46,8 @@ class UrIRC.UrChan : UrIRC.UrPlugin {
 		if (!isJoined) {
 			// send join cmd
 			bot.send("JOIN " + name);
-			// wait server confirm
-			//waituntil(bot.recv?("chan_join", var captures) if captures["chan"] == name && captures["nick"] == bot.nick);
+			// wait nick list (server confirm)
+			waituntil (bot.recv?("names_end", var captures) if captures["chan"] == name);
 		};
 	};
 	
@@ -77,7 +82,12 @@ class UrIRC.UrChan : UrIRC.UrPlugin {
 				_isJoined = false;
 				quitted!;
 			};
-			
+	
+			// chan names
+			at (bot.recv?("names", var captures) if captures["chan"] == name) {
+				_nickList = captures["nicks"];
+			};
+
 			// join this chan
 			join;
 		};
@@ -86,15 +96,22 @@ class UrIRC.UrChan : UrIRC.UrPlugin {
 		this
 	};
 
-	// return chan user list
-	function names() {
+	// ask server for user list
+	// wait until server answer
+	function _names() {
 		// create a child job
 		var names_job = _jobs.clone;
 
 		// this tag will be stopped if _jobs is stopped
 		names_job : {
 			bot.send("NAMES " + this.name);
+			waituntil (bot.recv?("names_end", var captures) if captures["chan"] == name);
 		};
+	};
+
+	// return the chan nick list 
+	function getNicks() {
+		_nickList;	
 	};
 };
 

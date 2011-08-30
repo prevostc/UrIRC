@@ -87,8 +87,8 @@ class UrIRC.UrEventDispatcher : UrIRC.UrPlugin {
 			[ // names reply
 				"regexp" => ":%s 353 %s = (.*?) :(.*?)$" % [bot.server, bot.nick], 
 				"recv_code" => "names", 
-				"captures" => ["chan", "users"],
-				"callbacks" => ["users" => UrIRC.UrUser.&stringToList],
+				"captures" => ["chan", "nicks"],
+				"callbacks" => ["nicks" => UrIRC.UrUser.&stringToList],
 			],
 			[ // end of names
 				"regexp" => ":%s 366 %s (.*?) .*$" % [bot.server, bot.nick], 

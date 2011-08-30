@@ -48,8 +48,8 @@ class UrIRC.UrUser : UrIRC.UrPlugin {
 		};
 	};
 
-	// parse a string as user list
-	// @return List[String] users : users pseudo list
+	// parse a string as nick list
+	// @return List[String] users : users nick list
 	var stringToList = function(str) {
 		var users = str.split([" +", " @", " ", "\n"]);
 		users.removeBack;
