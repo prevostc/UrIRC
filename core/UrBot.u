@@ -154,21 +154,20 @@ class UrIRC.UrBot {
 	 * @return UrUser|nil : The corresponding UrUser object, nil if this nick doesn't correspond to a user on this server.
 	 */
 	function getUser(nick, loginAndHost = nil) {
-
 		// caller provided userAndHost 
 		if (!loginAndHost.isNil) { 
 			// Dictionary key standardization
 			loginAndHost = loginAndHost.toLower;
 			
 			// user already known \o/
-			for| (var user : _users) {
+			for (var user : _users) {
 				if (user.nick == nick && user.loginAndHost == loginAndHost) 
 				return user;
 			}; 
 			
 			// we don't know this user, but we can create it.
 			// create the corresponding UrUser
-			var user = UrIRC.UrUser.new(this, nick, loginAndHost);
+			var user = UrIRC.UrUser.new(this, nick, loginAndHost).start;
 			_users << user; // store it
 			user	// and return it
 		
@@ -194,7 +193,7 @@ class UrIRC.UrBot {
 			// if this nick is known by this server
 			if (event == "whois_user") {
 				// create the corresponding UrUser
-				var user = UrIRC.UrUser.new(this, captures["nick"], captures["user"].toLower + "@" + captures["host"].toLower);
+				var user = UrIRC.UrUser.new(this, captures["nick"], captures["user"].toLower + "@" + captures["host"].toLower).start;
 				_users << user; // store it
 				user	// and return it
 

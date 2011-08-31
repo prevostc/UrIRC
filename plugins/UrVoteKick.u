@@ -1,0 +1,105 @@
+
+
+/*
+ * ask chan users to kick a member
+ */
+class UrIRC.UrVoteKick : UrIRC.UrPlugin {
+
+	// UrChan : chan object
+	var chan = nil;
+	
+	// UrUser : user object
+	var user = nil;
+	
+	// Boolean : if true, vote is in progress.
+	var _voting = nil;
+
+	// Regexp : start vote command matcher
+	var _cmd = nil;
+
+	// Regexp : vote command matcher
+	var _votecmd = nil;
+
+	// List[UrUser] : list of voters
+	var _voters = nil;
+
+	// Integer : votekick score
+	var _score = nil;
+
+	/*
+	 * Pseudo init method @see UrPlugin:init
+	 * @param String name : Chan name. Begin with a '#'
+	 */
+	function configure(params) {
+		chan = bot.getChan(params[0]);
+		_voting = false;
+		_cmd = Regexp.new("^!votekick (\\S+?)\\s*$");
+		_votecmd = Regexp.new("%s(\\+\\+|--)" % [bot.nick]);
+	};
+
+	/*
+	 * Declare watchdogs.
+	 */
+	function start() {
+		_jobs : {
+			// if no chan op
+			at (bot.recv?("chan_op_needed", var captures) if captures["chan"] == chan.name) {
+				chan.send("i'm not chan op");
+			};
+			
+			// watch votekick command
+			at (bot.recv?("chan_msg", var captures) if captures["chan"] == chan.name && !_voting && _cmd.match(captures["msg"])) {
+				// get user and avoid autokicks
+				if (_cmd.matches[1] == bot.nick) {
+					user = bot.getUser(captures["nick"], captures["serv"]);
+					echo(user);
+				} else {
+					user = bot.getUser(_cmd.matches[1]);
+					echo(user);
+				};
+				// begin game if user found
+				if (!user.isNil) {
+					_voting = true |
+					_score = 0 |
+					_voters = [] |
+					{
+						// backgrounded job sending periodic informations
+						sleep(30s)|
+						chan.send("30 sec left !! (kicks : %s)" % [_score])|
+						sleep(20s)|
+						chan.send("10 sec left !! (kicks : %s)" % [_score])|
+						sleep(10s)|
+						chan.send("end of vote (kicks : %s)" % [_score])|
+						if(_score > 0) chan.kick(user)|
+						sleep(1s)|
+						_voting = false|
+					},
+					chan.send("I want to kick %s (vote with %s++ and %s--) (kicks : %s)" % [user.nick, bot.nick, bot.nick, _score]);
+				} else {
+					chan.send("Unknown user \"%s\"" % [_cmd.matches[1]]);
+				};
+			};
+
+			// watch votes
+			at (bot.recv?("chan_msg", var captures) if captures["chan"] == chan.name && _voting && _votecmd.match(captures["msg"])) {
+				// wait for eventual nick changes
+				sleep(500ms);
+				// get the voter
+				var voter = bot.getUser(captures["nick"], captures["serv"]);
+				
+				// if this is a new voter
+				if (!_voters.has(voter)) {
+					_voters << voter;
+					echo(_votecmd.matches);
+					if (_votecmd.matches[1] == "++") {_score++}
+					else {_score--};
+					chan.send("Voted (kicks : %s)" % [_score]);
+				};
+			};
+		};
+	};
+};
+
+
+
+

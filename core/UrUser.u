@@ -41,11 +41,14 @@ class UrIRC.UrUser : UrIRC.UrPlugin {
 		"UrUser: " + nick + "(" + loginAndHost + ")";
 	};
 
-	// does nothing yet, but soon
+	// watch nick changes
 	function start() {
 		_jobs : {
-			
+			at (bot.recv?("nick_change", var captures) if captures["old_nick"] == nick && captures["serv"] == loginAndHost) {
+				nick = captures["new_nick"];
+			};
 		};
+		this;
 	};
 
 	// parse a string as nick list

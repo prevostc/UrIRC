@@ -46,4 +46,5 @@ requireFile("plugins/UrHelloWorld.u");
 requireFile("plugins/UrParrot.u");
 requireFile("plugins/UrAutoKick.u");
 requireFile("plugins/UrQueryOnKick.u");
+requireFile("plugins/UrVoteKick.u");
 

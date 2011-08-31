@@ -16,7 +16,10 @@ UrIRC.UrHelloWorld.new(bot, "#urbot").start;
 // the famous annoying plugin
 UrIRC.UrParrot.new(bot, "#urbot2").start;
 
-// still in dev
+// autokick
 UrIRC.UrAutoKick.new(bot, "#urbot2", "Carlos", "zerooooo ! ah ah !!").start;
+
+// votekick
+UrIRC.UrVoteKick.new(bot, "#urbot").start;
 
 
