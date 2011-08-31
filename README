@@ -31,12 +31,25 @@ Special notifiers can be set on any of the object's attributes to notify the C++
 Coming soon...
 @see files comments
 
-2.1. Usage
+2.1. Install
+
+Clone the repository
+	$ git clone git://github.com/prevostc/UrIRC.git
+Add UrIRC directory to URBI_PATH environment
+	Unix example (UrIRC.u located in ~/urbi/lib/UrIRC/UrIRC.u)
+		export URBI_PATH="$URBI_PATH":~/urbi/lib/UrIRC/
+	OR add this to your .bashrc file
+		URBI_PATH="$URBI_PATH":~/urbi/lib/UrIRC/
+Create a bot (see UrIRC manual 2.2)
+run !!
+	urbi mybot.u
+
+2.2. Usage
 
 Coming soon...
 @see main.u
 
-2.2. Guide me : write a plugin
+2.3. Guide me : write a plugin
 
 Coming soon...
 @see UrPlugin.u 

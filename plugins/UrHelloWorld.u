@@ -29,7 +29,7 @@ class UrIRC.UrHelloWorld : UrIRC.UrPlugin {
 	 * send "Hello world" to the specified chan
 	 */
 	function hello() {	
-		chan.sendMessage("Hello World");
+		chan.send("Hello World");
 	};
 };
 

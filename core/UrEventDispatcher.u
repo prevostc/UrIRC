@@ -95,6 +95,16 @@ class UrIRC.UrEventDispatcher : UrIRC.UrPlugin {
 				"recv_code" => "names_end", 
 				"captures" => ["chan"],
 			],
+			[ // chan op privileges needed
+				"regexp" => ":%s 482 %s (.*?) .*$" % [bot.server, bot.nick], 
+				"recv_code" => "chan_op_needed", 
+				"captures" => ["chan"],
+			],
+			[ // mode 
+				"regexp" => ":(.+?)!(.+?) MODE (.+?) ((?:\\+|-)(?:o)) (.+?)$", 
+				"recv_code" => "user_mode", 
+				"captures" => ["op_nick", "op_host", "chan", "mode", "nick"],
+			],
 		];
 	};
 

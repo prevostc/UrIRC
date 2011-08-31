@@ -52,7 +52,7 @@ class UrIRC.UrChan : UrIRC.UrPlugin {
 	};
 	
 	// send a public message on this chan
-	function sendMessage(msg) {
+	function send(msg) {
 		if (isJoined) {
 			bot.send("PRIVMSG " + name + " :" + msg);
 		};
@@ -111,7 +111,14 @@ class UrIRC.UrChan : UrIRC.UrPlugin {
 
 	// return the chan nick list 
 	function getNicks() {
+		_names;
 		_nickList;	
+	};
+
+	// kick a user
+	// @param UrUser user : a user object
+	function kick(user, msg = "") {
+		bot.send("KICK %s %s :%s" % [this.name, user.nick, msg]);
 	};
 };
 

@@ -25,7 +25,7 @@ class UrIRC.UrParrot : UrIRC.UrPlugin {
 			// on server message from this chan
 			at (bot.recv?("chan_msg", var captures) if captures["chan"] == chan.name) {
 				// repeat this message
-				chan.sendMessage(captures["nick"] + ": " + captures["msg"]);
+				chan.send(captures["nick"] + ": " + captures["msg"]);
 			};
 		};
 	};

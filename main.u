@@ -17,7 +17,6 @@ UrIRC.UrHelloWorld.new(bot, "#urbot").start;
 UrIRC.UrParrot.new(bot, "#urbot2").start;
 
 // still in dev
-UrIRC.UrAutoKick.new(bot, "#urbot2").start;
+UrIRC.UrAutoKick.new(bot, "#urbot2", "Carlos", "zerooooo ! ah ah !!").start;
 
 
-bot.getChan("#urbot").getNicks;

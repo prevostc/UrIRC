@@ -1,23 +1,68 @@
 
 
-
+/*
+ * Worst than Ban, here comes the auto-kick !
+ */
 class UrIRC.UrAutoKick : UrIRC.UrPlugin {
 
+	// UrChan : chan object
 	var chan = nil;
+	
+	// UrUser : user object
+	var user = nil;
 
+	// String : kick message
+	var msg = nil;
+
+	/*
+	 * Pseudo init method @see UrPlugin:init
+	 * @param String name : Chan name. Begin with a '#'
+	 * @param String user : User name.
+	 * @param String msg  : Kick message
+	 */
 	function configure(params) {
 		chan = bot.getChan(params[0]);
+		user = bot.getUser(params[1]);
+		if (params.size > 2) 
+			msg = params[2]
+		else
+			msg = "zero";
 	};
 
+	/*
+	 * Declare watchdogs and kick this user.
+	 */
 	function start() {
 		_jobs : {
-			at (bot.recv?("chan_join", var captures) if captures["chan"] == chan.name) {
-				var user = bot.getUser(captures["nick"], captures["serv"]);
+			// if no chan op
+			at (bot.recv?("chan_op_needed", var captures) if captures["chan"] == chan.name) {
+				// wait mode +o 
+				waituntil(
+					bot.recv?("user_mode", var captures) 
+					if captures["chan"] == chan.name 
+					&& captures["nick"] == bot.nick 
+					&& captures["mode"] == "+o"
+				);
+				countDown;
+				chan.kick(user,msg);
+			};
+
+			// if the user join this chan
+			at (bot.recv?("chan_join", var captures) if captures["chan"] == chan.name && captures["nick"] == user.nick) {
+				countDown;
+				chan.kick(user);
 			};
 			
-			at (bot.recv?("nick_change", var captures)) {
-				echo("nick change detected with regexp : " + regexp);	
-			};
+			// kick 
+			chan.kick(user);
+		};
+	};
+
+	// it's the final count dooooooown 
+	function countDown() {
+		for (var i : [3,2,1]) {
+			chan.send(i);
+			sleep(1s);
 		};
 	};
 };
