@@ -120,6 +120,11 @@ class UrIRC.UrChan : UrIRC.UrPlugin {
 	function kick(user, msg = "") {
 		bot.send("KICK %s %s :%s" % [this.name, user.nick, msg]);
 	};
+
+	//part from a chan
+	function part(msg) {	
+		bot.send("PART %s :%s" % [this.name, msg]);
+	};
 };
 
 

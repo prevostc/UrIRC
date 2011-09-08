@@ -55,7 +55,6 @@ class UrIRC.UrVoteKick : UrIRC.UrPlugin {
 					echo(user);
 				} else {
 					user = bot.getUser(_cmd.matches[1]);
-					echo(user);
 				};
 				// begin game if user found
 				if (!user.isNil) {
@@ -70,7 +69,15 @@ class UrIRC.UrVoteKick : UrIRC.UrPlugin {
 						chan.send("10 sec left !! (kicks : %s)" % [_score])|
 						sleep(10s)|
 						chan.send("end of vote (kicks : %s)" % [_score])|
-						if(_score > 0) chan.kick(user)|
+						if (_voters.size > 1) {
+							if(_score > 0) {
+								chan.kick(user) 
+							} else { 
+								chan.send("The crowd saved %s" % [user.nick]); 
+							}|
+						} else {
+							chan.send("Not enough voters");
+						} |
 						sleep(1s)|
 						_voting = false|
 					},
@@ -82,16 +89,16 @@ class UrIRC.UrVoteKick : UrIRC.UrPlugin {
 
 			// watch votes
 			at (bot.recv?("chan_msg", var captures) if captures["chan"] == chan.name && _voting && _votecmd.match(captures["msg"])) {
+				// save matches
+				var matches = _votecmd.matches;
 				// wait for eventual nick changes
 				sleep(500ms);
 				// get the voter
 				var voter = bot.getUser(captures["nick"], captures["serv"]);
-				
 				// if this is a new voter
 				if (!_voters.has(voter)) {
 					_voters << voter;
-					echo(_votecmd.matches);
-					if (_votecmd.matches[1] == "++") {_score++}
+					if (matches[1] == "++") {_score++}
 					else {_score--};
 					chan.send("Voted (kicks : %s)" % [_score]);
 				};

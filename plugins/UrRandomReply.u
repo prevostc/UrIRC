@@ -1,0 +1,56 @@
+
+
+/*
+ * Randomly send a reply from a list to each user message
+ */
+class UrIRC.UrRandomReply : UrIRC.UrPlugin {
+
+	// UrChan : chan object
+	var chan;
+
+	// UrUser : user object
+	var user;
+
+	// List[String] name : Answers
+	var replies;
+
+	/*
+	 * Pseudo init method @see UrPlugin:init
+	 * @param String name : Chan name. Begin with a '#'
+	 * @param String nick : User nick name.
+	 * @param List[String] name : Replies (%s will be replaced will user nick if provided)
+	 */
+	function configure(params) {
+		// get the chan object
+		chan = bot.getChan(params[0]);
+		// get the user object
+		user = bot.getUser(params[1]);
+		// save replies
+		replies = params[2];
+	};
+
+	/*
+	 * Declare watchdogs on user messages.
+	 */
+	function start() {
+		_jobs : {
+			// replie 
+			at (bot.recv?("chan_msg", var captures) if captures["chan"] == chan.name && captures["nick"] == user.nick) {
+				sleep(1.5s);
+				var msg = replies[replies.size.random];
+				
+				try { 
+					msg = msg % user.nick;
+				} catch (var e) { 
+					// too many arguments for format
+				};
+
+				chan.send(msg);
+			};
+		};
+	};
+};
+
+
+
+
