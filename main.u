@@ -14,12 +14,13 @@ UrIRC.UrQueryOnKick.new(bot, "#urbot", "Is '%s' a sufficient reason ?").start;
 UrIRC.UrHelloWorld.new(bot, "#urbot").start;
 
 // the famous annoying plugin
-UrIRC.UrParrot.new(bot, "#urbot2").start;
+UrIRC.UrParrot.new(bot, "#urbot").start;
 
 // autokick
-UrIRC.UrAutoKick.new(bot, "#urbot2", "Carlos", "zerooooo ! ah ah !!").start;
+UrIRC.UrAutoKick.new(bot, "#urbot", "User", "zerooooo ! ah ah !!").start;
 
 // votekick
 UrIRC.UrVoteKick.new(bot, "#urbot").start;
 
-
+// Random Reply
+UrIRC.UrRandomReply.new(bot, "#urbot", "User",["%s: cool story bro","please, don't"]).start;
