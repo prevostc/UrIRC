@@ -1,0 +1,92 @@
+
+
+/*
+ * Repeat all users messages on a particular chan
+ */
+class UrIRC.UrTg : UrIRC.UrPlugin {
+
+	// UrChan : chan object
+	var chan;
+
+	var user;
+
+
+	/*
+	 * Pseudo init method @see UrPlugin:init
+	 * @param String name : Chan name. Begin with a '#'
+	 */
+	function configure(params) {
+		// get the chan object
+		chan = bot.getChan(params[0]);
+		user = bot.getUser(params[1]);
+	};
+
+	function tg1() {
+		sleep(1.5s);
+		chan.send("shut up %s !" % [user.nick]);
+	};
+	function tg2() {
+		sleep(1.5s);
+		chan.send("%s: shuuuuuuuuuuuuut uuuuuuuuuuuuuuuuuuuuuuuup !!!!" % [user.nick]);	
+	};
+	function tg3() {
+		sleep(1.5s);
+		chan.send("%s: please, don't." % [user.nick]);	
+	};
+	function tg4() {
+		sleep(1.5s);
+		chan.send("%s: STFU FFS" % [user.nick]);	
+	};
+	function tg5() {
+		sleep(1.5s);
+		chan.send("Argh !!! %s killed me with some oral shit !!!" % [user.nick]);
+		chan.part("aaaaaarrrrghhh");
+		sleep(5s);
+		chan.join;
+		sleep(1s);
+		chan.send("I'm a zombie now !");
+	};
+	function tg6() {
+		sleep(1.5s);
+		chan.send("%s: Oh my.. don't do that !" % [user.nick]);	
+	};
+	function tg7() {
+		sleep(1.5s);
+		chan.send("%s: You'r sayin' shi... wait" % [user.nick]);	
+	};
+	function tg8() {
+		sleep(1.5s);
+		chan.send("%s: LALALALalalallaALALALALa" % [user.nick]);	
+	};
+	function tg9() {
+		sleep(1.5s);
+		chan.send("%s: /quit plz, thx !" % [user.nick]);	
+	};
+	function tg10() {
+		sleep(1.5s);
+		chan.send("%s: How about a nice big cup of shut the fuck up ?" % [user.nick]);	
+	};
+
+	/*
+	 * Declare watchdogs on user messages.
+	 */
+	function start() {
+		_jobs : {
+			at (bot.recv?("chan_msg", var captures) if captures["chan"] == chan.name && captures["nick"] == user.nick) {
+				var tgs = [this.&tg1, this.&tg2, this.&tg3, this.&tg4, this.&tg5, this.&tg6, this.&tg7, this.&tg8, this.&tg9, this.&tg10];
+				var tg = tgs[tgs.size.random];
+				tg();
+			};
+			// autorejoin
+			at (bot.recv?("kick", var captures) if captures["chan"] == chan.name) {
+				sleep(10s);
+				chan.join;
+				sleep(1s);
+			};
+		};
+	};
+};
+
+
+
+

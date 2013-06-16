@@ -1,0 +1,57 @@
+
+
+/*
+ * Repeat all users messages on a particular chan
+ */
+class UrIRC.UrRelou : UrIRC.UrPlugin {
+
+	// UrChan : chan object
+	var chan;
+
+	var rage = nil;
+
+	var rage_words = ["fu", "putain", "bordel", "pute", "chier"];
+
+	/*
+	 * Pseudo init method @see UrPlugin:init
+	 * @param String name : Chan name. Begin with a '#'
+	 */
+	function configure(params) {
+		// get the chan object
+		chan = bot.getChan(params[0]);
+	
+		var re = [];
+		for (var w : rage_words) {
+			var letters = w.split([""]);
+			var re_word = "";
+			for (var l : letters) {
+				re_word += "(?:%s|%s)+" % [l.toLower, l.toUpper]
+			};
+			re << "\\b%s\\b" % re_word;
+		};
+		rage = Regexp.new(re.join("|", "(?:", ")"));
+	};
+
+	/*
+	 * Declare watchdogs on user messages.
+	 */
+	function start() {
+		_jobs : {
+			at (bot.recv?("chan_msg", var captures) if captures["chan"] == chan.name && rage.match(captures["msg"])) {
+				sleep(1.5s);
+				// repeat this message
+				chan.send("tu rages %s ?" % [captures["nick"]]);
+			};
+			// autorejoin
+			at (bot.recv?("kick", var captures) if captures["chan"] == chan.name) {
+				sleep(10s);
+				chan.join;
+				sleep(1s);
+			};
+		};
+	};
+};
+
+
+
+

@@ -1,0 +1,10 @@
+
+requireFile("UrIRC.u");
+
+// create bot object
+var bot = UrIRC.UrBot.new("irc.iiens.net", 6667, "CoolStoryBot");
+bot.connect;
+
+// Random Reply
+UrIRC.UrRandomReply.new(bot, "#urbot", "Titoune",["%s: cool story bro","please, don't"]).start;
+

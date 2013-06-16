@@ -1,0 +1,19 @@
+
+requireFile("UrIRC.u");
+requireFile("UrTg.u");
+requireFile("UrRelou.u");
+
+// create bot object
+var bot = UrIRC.UrBot.new("irc.iiens.net", 6667, "Putobot");
+bot.connect;
+
+// tg bot
+UrIRC.UrTg.new(bot, "#suIcIdE", "schleuxy").start;
+UrIRC.UrTg.new(bot, "#suIcIdE", "Lahouma").start;
+UrIRC.UrTg.new(bot, "#suIcIdE", "fumerapreslamadcestcool").start;
+//UrIRC.UrTg.new(bot, "#suicide", "").start;
+
+sleep(2s);
+// Reloubot
+UrIRC.UrRelou.new(bot, "#suIcIdE").start;
+

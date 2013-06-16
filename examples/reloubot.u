@@ -1,0 +1,11 @@
+
+requireFile("UrIRC.u");
+requireFile("UrRelou.u");
+
+// create bot object
+var bot = UrIRC.UrBot.new("irc.iiens.net", 6667, "Reloubot");
+bot.connect;
+
+
+UrIRC.UrRelou.new(bot, "#rage").start;
+
